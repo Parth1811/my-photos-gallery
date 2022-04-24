@@ -2,9 +2,11 @@ package com.simplemobiletools.gallery.pro.extensions
 
 import android.annotation.TargetApi
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.ContentProviderOperation
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -17,6 +19,7 @@ import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity

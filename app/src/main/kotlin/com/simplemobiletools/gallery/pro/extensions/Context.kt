@@ -12,6 +12,7 @@ import android.media.AudioManager
 import android.os.Process
 import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
+import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
@@ -980,7 +981,7 @@ fun Context.addPathToDB(path: String) {
             val videoDuration = if (type == TYPE_VIDEOS) getDuration(path) ?: 0 else 0
             val medium = Medium(
                 null, path.getFilenameFromPath(), path, path.getParentPath(), System.currentTimeMillis(), System.currentTimeMillis(),
-                File(path).length(), type, videoDuration, isFavorite, 0L, 0L
+                File(path).length(), type, MediumState.CREATED, videoDuration, isFavorite, 0L, 0L
             )
 
             mediaDB.insert(medium)
@@ -1013,7 +1014,7 @@ fun Context.createDirectoryFromMedia(
     }
 
     val isSortingAscending = config.directorySorting.isSortingAscending()
-    val defaultMedium = Medium(0, "", "", "", 0L, 0L, 0L, 0, 0, false, 0L, 0L)
+    val defaultMedium = Medium(0, "", "", "", 0L, 0L, 0L, 0, MediumState.CREATED,0, false, 0L, 0L)
     val firstItem = curMedia.firstOrNull() ?: defaultMedium
     val lastItem = curMedia.lastOrNull() ?: defaultMedium
     val dirName = checkAppendingHidden(path, hiddenString, includedFolders, noMediaFolders)

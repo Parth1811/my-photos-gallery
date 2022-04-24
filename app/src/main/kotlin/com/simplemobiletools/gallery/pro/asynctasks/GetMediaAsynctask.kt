@@ -2,12 +2,15 @@ package com.simplemobiletools.gallery.pro.asynctasks
 
 import android.content.Context
 import android.os.AsyncTask
+import android.util.Log
 import com.simplemobiletools.commons.helpers.*
 import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.extensions.getFavoritePaths
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.ThumbnailItem
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage: Boolean = false, val isPickVideo: Boolean = false,

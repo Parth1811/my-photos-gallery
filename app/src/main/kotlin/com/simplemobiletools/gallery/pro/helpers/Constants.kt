@@ -173,8 +173,15 @@ const val TYPE_GIFS = 4
 const val TYPE_RAWS = 8
 const val TYPE_SVGS = 16
 const val TYPE_PORTRAITS = 32
+const val TYPE_CLOUD = 64
 
-fun getDefaultFileFilter() = TYPE_IMAGES or TYPE_VIDEOS or TYPE_GIFS or TYPE_RAWS or TYPE_SVGS
+// media states
+
+enum class MediumState{
+    CREATED, BACKED_UP, ON_CLOUD, RESTORED
+}
+
+fun getDefaultFileFilter() = TYPE_IMAGES or TYPE_VIDEOS or TYPE_GIFS or TYPE_RAWS or TYPE_SVGS or TYPE_CLOUD
 
 const val LOCATION_INTERNAL = 1
 const val LOCATION_SD = 2

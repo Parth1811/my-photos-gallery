@@ -411,7 +411,7 @@ class MediaFetcher(val context: Context) {
                 }
 
                 val isFavorite = favoritePaths.contains(path)
-                val medium = Medium(null, filename, path, file.parent, lastModified, dateTaken, size, type, videoDuration, isFavorite, 0L, 0L)
+                val medium = Medium(null, filename, path, file.parent, lastModified, dateTaken, size, type, MediumState.CREATED, videoDuration, isFavorite, 0L, 0L)
                 media.add(medium)
             }
         }
@@ -511,7 +511,7 @@ class MediaFetcher(val context: Context) {
 
                 val isFavorite = favoritePaths.contains(path)
                 val medium =
-                    Medium(null, filename, path, path.getParentPath(), lastModified, dateTaken, size, type, videoDuration, isFavorite, 0L, mediaStoreId)
+                    Medium(null, filename, path, path.getParentPath(), lastModified, dateTaken, size, type, MediumState.CREATED, videoDuration, isFavorite, 0L, mediaStoreId)
                 val parent = medium.parentPath.lowercase(Locale.getDefault())
                 val currentFolderMedia = media[parent]
                 if (currentFolderMedia == null) {
@@ -589,7 +589,7 @@ class MediaFetcher(val context: Context) {
             )
             val videoDuration = if (getVideoDurations) context.getDuration(path) ?: 0 else 0
             val isFavorite = favoritePaths.contains(path)
-            val medium = Medium(null, filename, path, folder, dateModified, dateTaken, size, type, videoDuration, isFavorite, 0L, 0L)
+            val medium = Medium(null, filename, path, folder, dateModified, dateTaken, size, type, MediumState.CREATED, videoDuration, isFavorite, 0L, 0L)
             media.add(medium)
         }
 

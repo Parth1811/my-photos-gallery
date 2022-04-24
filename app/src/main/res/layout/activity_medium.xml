@@ -12,7 +12,7 @@
 
     <include
         android:id="@+id/bottom_actions"
-        layout="@layout/bottom_actions"/>
+        layout="@layout/bottom_actions" />
 
     <ImageView
         android:id="@+id/top_shadow"

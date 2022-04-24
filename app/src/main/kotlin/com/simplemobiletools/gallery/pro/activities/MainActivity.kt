@@ -11,6 +11,7 @@ import android.os.Handler
 import android.provider.MediaStore
 import android.provider.MediaStore.Images
 import android.provider.MediaStore.Video
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
@@ -42,6 +43,8 @@ import com.simplemobiletools.gallery.pro.jobs.NewPhotoFetcher
 import com.simplemobiletools.gallery.pro.models.Directory
 import com.simplemobiletools.gallery.pro.models.Medium
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.*
 
 class MainActivity : SimpleActivity(), DirectoryOperationsListener {
@@ -317,6 +320,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             R.id.filter -> showFilterMediaDialog()
             R.id.open_camera -> launchCamera()
             R.id.show_all -> showAllMedia()
+            R.id.toggle_folder_view -> showAllMedia()
             R.id.change_view_type -> changeViewType()
             R.id.temporarily_show_hidden -> tryToggleTemporarilyShowHidden()
             R.id.stop_showing_hidden -> tryToggleTemporarilyShowHidden()

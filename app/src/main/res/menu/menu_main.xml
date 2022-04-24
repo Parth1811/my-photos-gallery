@@ -10,6 +10,11 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|always" />
     <item
+        android:id="@+id/toggle_folder_view"
+        android:icon="@drawable/ic_baseline_folder"
+        android:title="@string/album"
+        app:showAsAction="collapseActionView|always" />
+    <item
         android:id="@+id/open_camera"
         android:icon="@drawable/ic_camera_vector"
         android:title="@string/open_camera"

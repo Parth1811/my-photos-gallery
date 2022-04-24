@@ -141,7 +141,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
                     val filename = mPath.getFilenameFromPath()
                     val folder = mPath.getParentPath()
                     val type = getTypeFromPath(mPath)
-                    val medium = Medium(null, filename, mPath, folder, 0, 0, 0, type, 0, false, 0L, 0L)
+                    val medium = Medium(null, filename, mPath, folder, 0, 0, 0, type, MediumState.CREATED, 0, false, 0L, 0L)
                     thumbnailItems.add(medium)
                 }
 
@@ -421,7 +421,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
                     val isFavorite = favoritesDB.isFavorite(mPath)
                     val duration = if (type == TYPE_VIDEOS) getDuration(mPath) ?: 0 else 0
                     val ts = System.currentTimeMillis()
-                    val medium = Medium(null, filename, mPath, parent, ts, ts, File(mPath).length(), type, duration, isFavorite, 0, 0L)
+                    val medium = Medium(null, filename, mPath, parent, ts, ts, File(mPath).length(), type, MediumState.CREATED, duration, isFavorite, 0, 0L)
                     mediaDB.insert(medium)
                 }
             }
