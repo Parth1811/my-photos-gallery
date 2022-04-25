@@ -155,6 +155,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
                 finish()
             }
         }
+
     }
 
     private fun handleMediaPermissions(callback: (granted: Boolean) -> Unit) {

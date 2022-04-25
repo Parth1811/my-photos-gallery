@@ -523,4 +523,8 @@ class Config(context: Context) : BaseConfig(context) {
     var customFoldersOrder: String
         get() = prefs.getString(CUSTOM_FOLDERS_ORDER, "")!!
         set(customFoldersOrder) = prefs.edit().putString(CUSTOM_FOLDERS_ORDER, customFoldersOrder).apply()
+
+    var myCloudToken: String
+        get() = prefs.getString(MY_CLOUD_TOKEN, "")!!
+        set(token) = prefs.edit().putString(MY_CLOUD_TOKEN, token).apply()
 }

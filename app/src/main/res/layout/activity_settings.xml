@@ -1026,5 +1026,48 @@
 
             </RelativeLayout>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/settings_mycloud_label"
+            style="@style/SettingsSectionLabelStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/my_cloud_setting" />
+
+        <LinearLayout
+            android:id="@+id/settings_mycloud_holder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/medium_margin"
+            android:background="@drawable/section_holder_stroke"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/settings_token_holder"
+                style="@style/SettingsHolderTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ripple_top_corners">
+
+                <com.simplemobiletools.commons.views.MyTextView
+                    android:id="@+id/settings_token_label"
+                    style="@style/SettingsTextLabelStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/token" />
+
+                <com.simplemobiletools.commons.views.MyTextView
+                    android:id="@+id/settings_token_value"
+                    style="@style/SettingsTextValueStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_token_label"
+                    tools:text="No Token" />
+
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

@@ -431,6 +431,8 @@
         <b>Reddit:</b>
         https://www.reddit.com/r/SimpleMobileTools
     </string>
+    <string name="my_cloud_setting">My Cloud Setting</string>
+    <string name="token">Token</string>
 
     <!--
         Haven't found some strings? There's more at

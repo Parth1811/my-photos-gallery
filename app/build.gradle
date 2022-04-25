@@ -104,6 +104,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
+    implementation 'com.android.volley:volley:1.2.1'
 
     kapt 'com.github.bumptech.glide:compiler:4.12.0'
 

@@ -1,10 +1,14 @@
 package com.simplemobiletools.gallery.pro.activities
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.text.TextUtils
 import android.view.Menu
+import android.widget.EditText
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.simplemobiletools.commons.dialogs.*
@@ -23,6 +27,7 @@ import kotlinx.android.synthetic.main.activity_settings.*
 import java.io.File
 import java.io.InputStream
 import java.util.*
+
 
 class SettingsActivity : SimpleActivity() {
     private val PICK_IMPORT_SOURCE_INTENT = 1
@@ -89,6 +94,7 @@ class SettingsActivity : SimpleActivity() {
         setupExportSettings()
         setupImportSettings()
         invalidateOptionsMenu()
+        setUpMyCloudToken()
 
         arrayOf(
             settings_color_customization_label,
@@ -165,6 +171,37 @@ class SettingsActivity : SimpleActivity() {
         settings_change_date_time_format_holder.setOnClickListener {
             ChangeDateTimeFormatDialog(this) {}
         }
+    }
+
+    private fun setUpMyCloudToken(){
+        if(config.myCloudToken.isNotBlank()){
+            // settings_token_value.text = "<secret token>"
+            settings_token_value.text = config.myCloudToken
+        } else {
+            settings_token_value.text = "Please Login/ Enter a Access token"
+
+        }
+
+        settings_token_holder.setOnClickListener{
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+            builder.setTitle("Enter Token")
+
+            val input = EditText(this)
+
+            input.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            builder.setView(input)
+            builder.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                if(config.myCloudToken.isNotBlank()) {
+                    config.myCloudToken = input.text.toString()
+                    settings_token_value.text = config.myCloudToken
+                }
+            })
+            builder.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            builder.show()
+        }
+
+
     }
 
     private fun setupFileLoadingPriority() {
