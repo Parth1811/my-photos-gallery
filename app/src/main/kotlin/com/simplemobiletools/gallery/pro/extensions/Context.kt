@@ -838,6 +838,7 @@ fun Context.updateDBDirectory(directory: Directory) {
             directory.sortValue
         )
     } catch (ignored: Exception) {
+        Log.e("UpdateDirectory", ignored.toString())
     }
 }
 
@@ -1016,7 +1017,9 @@ fun Context.createDirectoryFromMedia(
 
     if (thumbnail == null) {
         val sortedMedia = grouped.filter { it is Medium }.toMutableList() as ArrayList<Medium>
-        thumbnail = sortedMedia.firstOrNull { getDoesFilePathExist(it.path, OTGPath) }?.path ?: ""
+        thumbnail = sortedMedia.firstOrNull {
+            getDoesFilePathExist(it.path, OTGPath) || it.path.startsWith("http://")
+        }?.path ?: ""
     }
 
     if (config.OTGPath.isNotEmpty() && thumbnail!!.startsWith(config.OTGPath)) {
@@ -1092,6 +1095,12 @@ fun Context.updateDirectoryPath(path: String) {
         path, getImagesOnly, getVideosOnly, getProperDateTaken, getProperLastModified, getProperFileSize,
         favoritePaths, false, lastModifieds, dateTakens, null
     )
+
+//    val onCloudMedia = mediaDB.getOnCloudMediaFromPath(path)
+//    curMedia.addAll(onCloudMedia)
+//    mediaFetcher.sortMedia(curMedia, config.getFolderSorting(path))
+//
+
     val directory = createDirectoryFromMedia(path, curMedia, albumCovers, hiddenString, includedFolders, getProperFileSize, noMediaFolders)
     updateDBDirectory(directory)
 }

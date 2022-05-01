@@ -99,7 +99,7 @@ class MyCloudSyncerService : JobService(){
                         ensureBackgroundThread {
                             checkAllPhotoSync(response)
                         }
-                        jobFinished(params, false)
+                        jobFinished(params, true)
                     }
                 }
             )

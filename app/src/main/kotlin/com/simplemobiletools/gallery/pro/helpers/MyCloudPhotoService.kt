@@ -37,7 +37,7 @@ class MyCloudPhotoService constructor(context: Context) {
 
     }
     private val URL = "http://127.0.0.1:8000"
-    private var TOKEN = ""
+    private var TOKEN = "c21dbb569d32ecff4d4376a1b0d3288471ecb3aa"
     private val username = "parth"
     private val password = "s+r0ngPa554@photos"
     private val requestQueue: RequestQueue by lazy {

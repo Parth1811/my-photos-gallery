@@ -31,7 +31,10 @@ interface MediumDao {
     fun getNotBackedUpPath(): List<Medium>
 
     @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE state == 'ON_CLOUD'")
-    fun getOnCloudPath(): List<Medium>
+    fun getOnCloudMedia(): List<Medium>
+
+    @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE deleted_ts = 0 AND parent_path = :path COLLATE NOCASE AND  state == 'ON_CLOUD'")
+    fun getOnCloudMediaFromPath(path: String): List<Medium>
 
     @Query("SELECT COUNT(filename) FROM media WHERE state != 'CREATED'")
     fun getNumberOfCloudFiles(): Long

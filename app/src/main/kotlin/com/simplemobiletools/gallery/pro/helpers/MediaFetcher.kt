@@ -75,6 +75,9 @@ class MediaFetcher(val context: Context) {
             }
         }
 
+        val cloudMedia = context.mediaDB.getOnCloudMediaFromPath(curPath)
+        curMedia.addAll(cloudMedia)
+
         sortMedia(curMedia, context.config.getFolderSorting(curPath))
 
         return curMedia
