@@ -27,6 +27,15 @@ interface MediumDao {
     @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE deleted_ts < :timestmap AND deleted_ts != 0")
     fun getOldRecycleBinItems(timestmap: Long): List<Medium>
 
+    @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE state != 'CREATED'")
+    fun getNotBackedUpPath(): List<Medium>
+
+    @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE state == 'ON_CLOUD'")
+    fun getOnCloudPath(): List<Medium>
+
+    @Query("SELECT COUNT(filename) FROM media WHERE state != 'CREATED'")
+    fun getNumberOfCloudFiles(): Long
+
     @Insert(onConflict = REPLACE)
     fun insert(medium: Medium)
 

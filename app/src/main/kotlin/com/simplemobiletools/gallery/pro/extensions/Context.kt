@@ -961,6 +961,16 @@ fun Context.parseFileChannel(path: String, fc: FileChannel, level: Int, start: L
     }
 }
 
+fun Context.getNumberOfCloudFiles(): Long {
+    try {
+        return mediaDB.getNumberOfCloudFiles()
+    } catch (ignored: Exception) {
+
+    }
+    return 0
+}
+
+
 fun Context.addPathToDB(path: String) {
     ensureBackgroundThread {
         if (!getDoesFilePathExist(path)) {

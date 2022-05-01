@@ -6,6 +6,7 @@ import android.util.Log
 import com.simplemobiletools.commons.helpers.*
 import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.extensions.getFavoritePaths
+import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.ThumbnailItem
@@ -42,7 +43,9 @@ class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage
             foldersToScan.forEach {
                 val newMedia = mediaFetcher.getFilesFrom(it, isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize,
                     favoritePaths, getVideoDurations, lastModifieds, dateTakens, null)
+                val cloudMedia = context.mediaDB.getOnCloudPath()
                 media.addAll(newMedia)
+                media.addAll(cloudMedia)
             }
 
             mediaFetcher.sortMedia(media, context.config.getFolderSorting(SHOW_ALL))

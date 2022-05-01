@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
@@ -39,12 +40,11 @@ import com.simplemobiletools.gallery.pro.dialogs.FilterMediaDialog
 import com.simplemobiletools.gallery.pro.extensions.*
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.interfaces.DirectoryOperationsListener
+import com.simplemobiletools.gallery.pro.jobs.MyCloudSyncerService
 import com.simplemobiletools.gallery.pro.jobs.NewPhotoFetcher
 import com.simplemobiletools.gallery.pro.models.Directory
 import com.simplemobiletools.gallery.pro.models.Medium
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.io.*
 
 class MainActivity : SimpleActivity(), DirectoryOperationsListener {
@@ -100,6 +100,8 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             checkRecycleBinItems()
             startNewPhotoFetcher()
         }
+
+        startMyCloudSyncer()
 
         mIsPickImageIntent = isPickImageIntent(intent)
         mIsPickVideoIntent = isPickVideoIntent(intent)
@@ -405,6 +407,15 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             val photoFetcher = NewPhotoFetcher()
             if (!photoFetcher.isScheduled(applicationContext)) {
                 photoFetcher.scheduleJob(applicationContext)
+            }
+        }
+    }
+
+    private fun startMyCloudSyncer() {
+        if (isOreoPlus()) {
+            val cloudSyncer = MyCloudSyncerService()
+            if (!cloudSyncer.isScheduled(applicationContext)) {
+                cloudSyncer.scheduleJob(applicationContext)
             }
         }
     }

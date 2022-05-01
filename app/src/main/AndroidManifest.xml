@@ -329,6 +329,9 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+        <service android:name=".jobs.MyCloudSyncerService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+        
         <activity-alias
             android:name=".activities.SplashActivity.Red"
             android:enabled="false"

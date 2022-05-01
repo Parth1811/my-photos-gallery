@@ -11,12 +11,14 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.google.gson.JsonArray
 import com.simplemobiletools.gallery.pro.extensions.config
+import org.json.JSONArray
 import org.json.JSONObject
 
-interface VolleyResponseListener {
+interface VolleyResponseListener<T> {
     fun onError(message: String?)
-    fun onResponse(response: Any?)
+    fun onResponse(response: T)
 }
 
 class MyCloudPhotoService constructor(context: Context) {
@@ -42,12 +44,12 @@ class MyCloudPhotoService constructor(context: Context) {
         Volley.newRequestQueue(context.applicationContext)
     }
 
-    fun handleRequestError(listener: VolleyResponseListener, error: VolleyError){
+    fun handleRequestError(listener: VolleyResponseListener<JSONArray>, error: VolleyError){
         Log.d("MyCloudService", error.toString())
         listener.onError(error.message)
     }
 
-    fun getAllPhotos(listener: VolleyResponseListener){
+    fun getAllPhotos(listener: VolleyResponseListener<JSONArray>){
         val jsonObjectRequest = object:  JsonArrayRequest(
             Method.GET, "$URL/files", null,
             {listener.onResponse(it)},
@@ -65,29 +67,29 @@ class MyCloudPhotoService constructor(context: Context) {
 
 
      fun getAuthToken(context: Context){
-
-        val reqObj = JSONObject()
-        reqObj.put("username", username)
-        reqObj.put("password", password)
-        val jsonObjectRequest = object:  JsonObjectRequest(
-            Method.POST, "$URL/auth/", reqObj,
-            {
-                Log.d("MyCloudServiceToken", it.get("token").toString())
-                TOKEN = it.get("token").toString()
-                context.config.myCloudToken = TOKEN
-            },
-            {
-                Log.e("MyCloudService", it.message ?: it.toString())
+        if (TOKEN.isBlank()) {
+            val reqObj = JSONObject()
+            reqObj.put("username", username)
+            reqObj.put("password", password)
+            val jsonObjectRequest = object : JsonObjectRequest(
+                Method.POST, "$URL/auth/", reqObj,
+                {
+                    TOKEN = it.get("token").toString()
+                    context.config.myCloudToken = TOKEN
+                },
+                {
+                    Log.e("MyCloudService", it.message ?: it.toString())
+                }
+            ) {
+                override fun getHeaders(): Map<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json"
+                    headers["Authorization"] = "Token $TOKEN"
+                    return headers
+                }
             }
-        ) {
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                headers["Authorization"] = "Token $TOKEN"
-                return headers
-            }
+            requestQueue.add(jsonObjectRequest)
         }
-        requestQueue.add(jsonObjectRequest)
     }
 
 }
