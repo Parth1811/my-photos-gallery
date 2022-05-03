@@ -1,95 +1,79 @@
-package com.simplemobiletools.gallery.pro.helpers
 
-import android.annotation.SuppressLint
+// Retrofit interface
+package com.ayush.retrofitexample
+
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import androidx.arch.core.util.Function
-import com.android.volley.AuthFailureError
-import com.android.volley.RequestQueue
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.google.gson.JsonArray
 import com.simplemobiletools.gallery.pro.extensions.config
-import org.json.JSONArray
-import org.json.JSONObject
+import com.simplemobiletools.gallery.pro.models.LoginRequest
+import com.simplemobiletools.gallery.pro.models.LoginResponse
+import com.simplemobiletools.gallery.pro.models.UserFiles
+import kotlinx.coroutines.GlobalScope
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.*
 
-interface VolleyResponseListener<T> {
-    fun onError(message: String?)
-    fun onResponse(response: T)
+interface MyCloudPhotoAPI {
+
+    @GET("/files")
+    suspend fun getAllPhotos(@Header("Authorization") token: String): Response<List<UserFiles>>
+
+    @POST("/auth/")
+//    @FormUrlEncoded
+    fun getAuthToken(@Body request: LoginRequest): Call<LoginResponse>
 }
 
-class MyCloudPhotoService constructor(context: Context) {
+class RetrofitHelper(context: Context) {
 
-    companion object {
-        @Volatile
-        private var INSTANCE: MyCloudPhotoService? = null
-        fun getInstance(context: Context) =
-            INSTANCE ?: synchronized(this) {
-                INSTANCE ?: MyCloudPhotoService(context).also {
-                    INSTANCE = it
-                }.apply {
-                    TOKEN = context.config.myCloudToken
-                }
-            }
-
-    }
-    private val URL = "http://127.0.0.1:8000"
-    private var TOKEN = "c21dbb569d32ecff4d4376a1b0d3288471ecb3aa"
+    val BASE_URL = "http://127.0.0.1:8000/"
+    var TOKEN = ""
+    val TAG = "RetrofitHelper"
     private val username = "parth"
     private val password = "s+r0ngPa554@photos"
-    private val requestQueue: RequestQueue by lazy {
-        Volley.newRequestQueue(context.applicationContext)
-    }
 
-    fun handleRequestError(listener: VolleyResponseListener<JSONArray>, error: VolleyError){
-        Log.d("MyCloudService", error.toString())
-        listener.onError(error.message)
-    }
+    private lateinit var retrofit: Retrofit
+    lateinit var api: MyCloudPhotoAPI
 
-    fun getAllPhotos(listener: VolleyResponseListener<JSONArray>){
-        val jsonObjectRequest = object:  JsonArrayRequest(
-            Method.GET, "$URL/files", null,
-            {listener.onResponse(it)},
-            {handleRequestError(listener, it)}
-        ) {
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                headers["Authorization"] = "Token $TOKEN"
-                return headers
-            }
-        }
-        requestQueue.add(jsonObjectRequest)
-    }
+    companion object {
+        @Volatile private var INSTANCE: RetrofitHelper? = null
 
+        fun getInstance(context: Context): RetrofitHelper =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: RetrofitHelper(context).also {
+                    it.retrofit =  Retrofit.Builder().baseUrl(it.BASE_URL)
+                                        .addConverterFactory(GsonConverterFactory.create())
+                                        .build()
 
-     fun getAuthToken(context: Context){
-        if (TOKEN.isBlank()) {
-            val reqObj = JSONObject()
-            reqObj.put("username", username)
-            reqObj.put("password", password)
-            val jsonObjectRequest = object : JsonObjectRequest(
-                Method.POST, "$URL/auth/", reqObj,
-                {
-                    TOKEN = it.get("token").toString()
-                    context.config.myCloudToken = TOKEN
-                },
-                {
-                    Log.e("MyCloudService", it.message ?: it.toString())
-                }
-            ) {
-                override fun getHeaders(): Map<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json"
-                    headers["Authorization"] = "Token $TOKEN"
-                    return headers
+                    it.api = it.retrofit.create(MyCloudPhotoAPI::class.java)
+                    it.TOKEN = "Token ${context.config.myCloudToken}"
+                    it.ensureAuthToken(context)
                 }
             }
-            requestQueue.add(jsonObjectRequest)
+
+    }
+
+    fun ensureAuthToken(context: Context){
+        if(context.config.myCloudToken.isBlank()){
+            val response = api.getAuthToken(
+                LoginRequest(
+                    username = username,
+                    password = password
+            )).execute()
+
+            if(response.isSuccessful){
+                val token = response.body()?.token
+                if(token?.isNotBlank() == true){
+                    TOKEN = "Token $token"
+                    context.config.myCloudToken = token
+                }
+            } else{
+                Log.e(TAG, response.errorBody().toString())
+            }
         }
     }
 
 }
+

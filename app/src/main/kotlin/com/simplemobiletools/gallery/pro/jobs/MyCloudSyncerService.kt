@@ -9,20 +9,19 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.google.gson.JsonArray
-import com.simplemobiletools.commons.extensions.getFilenameFromPath
+import com.ayush.retrofitexample.RetrofitHelper
 import com.simplemobiletools.commons.extensions.getParentPath
 import com.simplemobiletools.commons.helpers.ensureBackgroundThread
-import com.simplemobiletools.gallery.pro.extensions.addPathToDB
 import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 import com.simplemobiletools.gallery.pro.helpers.MediumState
-import com.simplemobiletools.gallery.pro.helpers.MyCloudPhotoService
 import com.simplemobiletools.gallery.pro.helpers.TYPE_IMAGES
-import com.simplemobiletools.gallery.pro.helpers.VolleyResponseListener
 import com.simplemobiletools.gallery.pro.models.Medium
-import org.json.JSONArray
-import java.io.File
+import com.simplemobiletools.gallery.pro.models.UserFiles
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MyCloudSyncerService : JobService(){
@@ -50,20 +49,19 @@ class MyCloudSyncerService : JobService(){
         return jobs.any { it.id == MY_CLOUD_SYNCER_JOB }
     }
 
-    private fun checkAllPhotoSync(response: JSONArray){
+    private fun checkAllPhotoSync(response: List<UserFiles>?){
         val currentCloudFilesNumber = mediaDB.getNumberOfCloudFiles()
-        if (currentCloudFilesNumber < response.length()){
+        if (currentCloudFilesNumber < response?.size ?: 0){
             val affectedFolderPaths = HashSet<String>()
-            for(index in 0 until response.length()){
-                val userFile = response.getJSONObject(index)
+            response?.forEach{ userFile ->
 
-                affectedFolderPaths.add(userFile.getString("path_on_device").getParentPath())
+                affectedFolderPaths.add(userFile.path_on_device.getParentPath())
 
                 mediaDB.insert(Medium(
                     null,
-                    userFile.getString("name"),
-                    "http://127.0.0.1:8000/file/${userFile.getString("stored_file")}",
-                    userFile.getString("path_on_device").getParentPath(),
+                    userFile.name,
+                    "http://127.0.0.1:8000/file/${userFile.stored_file}",
+                    userFile.path_on_device.getParentPath(),
                     System.currentTimeMillis(),
                     System.currentTimeMillis(),
                     1234,
@@ -85,24 +83,21 @@ class MyCloudSyncerService : JobService(){
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onStartJob(params: JobParameters?): Boolean {
+        Log.d(TAG, "Starting Syncing Job ${Calendar.getInstance().time}")
         ensureBackgroundThread {
-            val myCloudPhotoService = MyCloudPhotoService.getInstance(this)
-            myCloudPhotoService.getAuthToken(this)
-            myCloudPhotoService.getAllPhotos(
-                object: VolleyResponseListener<JSONArray>{
-                    override fun onError(message: String?) {
-                        Log.e(TAG, "Trying to restart Job")
-                        jobFinished(params, true)
-                    }
-                    override fun onResponse(response: JSONArray) {
-                        ensureBackgroundThread {
-                            checkAllPhotoSync(response)
-                        }
-                        jobFinished(params, true)
-                    }
+            val myCloudPhotoAPI = RetrofitHelper.getInstance(this)
+            GlobalScope.launch {
+                val response = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
+                if(response.isSuccessful){
+                    checkAllPhotoSync(response.body())
+                    jobFinished(params, false)
+                } else{
+                    Log.e(TAG, response.errorBody().toString())
+                    jobFinished(params, true)
                 }
-            )
+            }
         }
         return true
     }
