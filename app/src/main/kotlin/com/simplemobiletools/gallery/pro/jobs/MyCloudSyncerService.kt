@@ -11,16 +11,21 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.ayush.retrofitexample.RetrofitHelper
 import com.simplemobiletools.commons.extensions.getParentPath
+import com.simplemobiletools.commons.extensions.toInt
 import com.simplemobiletools.commons.helpers.ensureBackgroundThread
 import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 import com.simplemobiletools.gallery.pro.helpers.MediumState
 import com.simplemobiletools.gallery.pro.helpers.TYPE_IMAGES
+import com.simplemobiletools.gallery.pro.models.FileTypes
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.UserFiles
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -55,20 +60,19 @@ class MyCloudSyncerService : JobService(){
             val affectedFolderPaths = HashSet<String>()
             response?.forEach{ userFile ->
 
-                affectedFolderPaths.add(userFile.path_on_device.getParentPath())
-
-                mediaDB.insert(Medium(
+                affectedFolderPaths.add(userFile.pathOnDevice.getParentPath())
+                    mediaDB.insert(Medium(
                     null,
                     userFile.name,
-                    "http://127.0.0.1:8000/file/${userFile.stored_file}",
-                    userFile.path_on_device.getParentPath(),
-                    System.currentTimeMillis(),
-                    System.currentTimeMillis(),
-                    1234,
-                    TYPE_IMAGES,
+                    "http://127.0.0.1:8000/file/${userFile.storedFile}/",
+                    userFile.pathOnDevice.getParentPath(),
+                    ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
+                    ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,
+                    userFile.size,
+                    userFile.type.value,
                     MediumState.ON_CLOUD,
-                    0,
-                    false,
+                    userFile.videoDuration,
+                    userFile.isFavorite,
                     0L,
                     0L
                 ))
