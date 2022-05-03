@@ -335,7 +335,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             return
         }
 
-        if (!getDoesFilePathExist(mPath) && getPortraitPath() == "") {
+        if (!getDoesFilePathExist(mPath) && getPortraitPath() == "" && mPath.startsWith("http://").not()) {
             finish()
             return
         }
@@ -368,9 +368,11 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
 
         val isShowingFavorites = intent.getBooleanExtra(SHOW_FAVORITES, false)
         val isShowingRecycleBin = intent.getBooleanExtra(SHOW_RECYCLE_BIN, false)
+        val isOnCloud = mPath.startsWith("http://")
         mDirectory = when {
             isShowingFavorites -> FAVORITES
             isShowingRecycleBin -> RECYCLE_BIN
+            isOnCloud -> "/storage/emulated/0/DCIM/Camera"
             else -> mPath.getParentPath()
         }
         supportActionBar?.title = mPath.getFilenameFromPath()
