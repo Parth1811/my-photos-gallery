@@ -6,6 +6,7 @@ import com.bumptech.glide.signature.ObjectKey
 import com.simplemobiletools.commons.extensions.formatDate
 import com.simplemobiletools.commons.extensions.formatSize
 import com.simplemobiletools.commons.helpers.*
+import com.simplemobiletools.gallery.pro.helpers.LOCATION_CLOUD
 import com.simplemobiletools.gallery.pro.helpers.RECYCLE_BIN
 
 @Entity(tableName = "directories", indices = [Index(value = ["path"], unique = true)])
@@ -40,6 +41,8 @@ data class Directory(
     fun areFavorites() = path == FAVORITES
 
     fun isRecycleBin() = path == RECYCLE_BIN
+
+    fun isCouldPath() = location == LOCATION_CLOUD
 
     fun getKey() = ObjectKey("$path-$modified")
 }

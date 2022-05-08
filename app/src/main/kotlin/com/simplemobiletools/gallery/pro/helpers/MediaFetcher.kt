@@ -12,6 +12,7 @@ import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
 import android.text.format.DateFormat
 import com.simplemobiletools.commons.extensions.*
+import com.simplemobiletools.commons.extensions.getDoesFilePathExist
 import com.simplemobiletools.commons.helpers.*
 import com.simplemobiletools.gallery.pro.R
 import com.simplemobiletools.gallery.pro.extensions.*

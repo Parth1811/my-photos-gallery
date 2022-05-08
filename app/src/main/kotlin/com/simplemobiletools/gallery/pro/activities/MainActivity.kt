@@ -6,13 +6,11 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
 import android.provider.MediaStore.Images
 import android.provider.MediaStore.Video
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
@@ -323,7 +321,6 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             R.id.filter -> showFilterMediaDialog()
             R.id.open_camera -> launchCamera()
             R.id.show_all -> showAllMedia()
-            R.id.toggle_folder_view -> showAllMedia()
             R.id.change_view_type -> changeViewType()
             R.id.temporarily_show_hidden -> tryToggleTemporarilyShowHidden()
             R.id.stop_showing_hidden -> tryToggleTemporarilyShowHidden()
@@ -970,7 +967,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
                 )
 
                 val newDir = if (curMedia.isEmpty()) {
-                    if (directory.path != tempFolderPath) {
+                    if (directory.path != tempFolderPath && !directory.isCouldPath()) {
                         dirPathsToRemove.add(directory.path)
                     }
                     directory
@@ -1267,7 +1264,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
     private fun checkInvalidDirectories(dirs: ArrayList<Directory>) {
         val invalidDirs = ArrayList<Directory>()
         val OTGPath = config.OTGPath
-        dirs.filter { !it.areFavorites() && !it.isRecycleBin() }.forEach {
+        dirs.filter { !it.areFavorites() && !it.isRecycleBin() && !it.isCouldPath() }.forEach {
             if (!getDoesFilePathExist(it.path, OTGPath)) {
                 invalidDirs.add(it)
             } else if (it.path != config.tempFolderPath && !isRPlus()) {

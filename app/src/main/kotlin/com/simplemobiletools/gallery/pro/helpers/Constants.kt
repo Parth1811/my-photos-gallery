@@ -1,7 +1,6 @@
 package com.simplemobiletools.gallery.pro.helpers
 
 import com.simplemobiletools.commons.helpers.MONTH_SECONDS
-import com.simplemobiletools.commons.helpers.isQPlus
 
 // shared preferences
 const val DIRECTORY_SORT_ORDER = "directory_sort_order"
@@ -187,6 +186,7 @@ fun getDefaultFileFilter() = TYPE_IMAGES or TYPE_VIDEOS or TYPE_GIFS or TYPE_RAW
 const val LOCATION_INTERNAL = 1
 const val LOCATION_SD = 2
 const val LOCATION_OTG = 3
+const val LOCATION_CLOUD = 4
 
 const val GROUP_BY_NONE = 1
 const val GROUP_BY_LAST_MODIFIED_DAILY = 2

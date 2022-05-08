@@ -250,6 +250,7 @@ class MediaActivity : SimpleActivity(), MediaOperationsListener {
             findItem(R.id.increase_column_count).isVisible = viewType == VIEW_TYPE_GRID && config.mediaColumnCnt < MAX_COLUMN_COUNT
             findItem(R.id.reduce_column_count).isVisible = viewType == VIEW_TYPE_GRID && config.mediaColumnCnt > 1
             findItem(R.id.toggle_filename).isVisible = viewType == VIEW_TYPE_GRID
+
         }
 
         setupSearch(menu)
@@ -623,7 +624,8 @@ class MediaActivity : SimpleActivity(), MediaOperationsListener {
     private fun deleteDBDirectory() {
         ensureBackgroundThread {
             try {
-                directoryDao.deleteDirPath(mPath)
+                if(directoryDao.getDirectoryWithPath(mPath).isCouldPath().not())
+                    directoryDao.deleteDirPath(mPath)
             } catch (ignored: Exception) {
             }
         }

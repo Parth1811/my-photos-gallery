@@ -9,11 +9,13 @@
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|always" />
+
     <item
-        android:id="@+id/toggle_folder_view"
-        android:icon="@drawable/ic_baseline_folder"
-        android:title="@string/album"
+        android:id="@+id/show_all"
+        android:icon="@drawable/ic_baseline_image_24"
+        android:title="@string/show_all"
         app:showAsAction="collapseActionView|always" />
+
     <item
         android:id="@+id/open_camera"
         android:icon="@drawable/ic_camera_vector"
@@ -43,11 +45,6 @@
         android:id="@+id/stop_showing_hidden"
         android:showAsAction="never"
         android:title="@string/stop_showing_hidden"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/show_all"
-        android:showAsAction="never"
-        android:title="@string/show_all"
         app:showAsAction="never" />
     <item
         android:id="@+id/show_the_recycle_bin"

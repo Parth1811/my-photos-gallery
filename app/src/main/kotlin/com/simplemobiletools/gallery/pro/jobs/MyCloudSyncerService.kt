@@ -11,20 +11,13 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.ayush.retrofitexample.RetrofitHelper
 import com.simplemobiletools.commons.extensions.getParentPath
-import com.simplemobiletools.commons.extensions.toInt
 import com.simplemobiletools.commons.helpers.ensureBackgroundThread
 import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 import com.simplemobiletools.gallery.pro.helpers.MediumState
-import com.simplemobiletools.gallery.pro.helpers.TYPE_IMAGES
-import com.simplemobiletools.gallery.pro.models.FileTypes
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.UserFiles
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import kotlinx.coroutines.*
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -64,7 +57,7 @@ class MyCloudSyncerService : JobService(){
                     mediaDB.insert(Medium(
                     null,
                     userFile.name,
-                    "http://127.0.0.1:8000/file/${userFile.storedFile}/",
+                    "${RetrofitHelper.getInstance(this).BASE_URL}file/${userFile.storedFile}/",
                     userFile.pathOnDevice.getParentPath(),
                     ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
                     ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,
@@ -91,18 +84,24 @@ class MyCloudSyncerService : JobService(){
     override fun onStartJob(params: JobParameters?): Boolean {
         Log.d(TAG, "Starting Syncing Job ${Calendar.getInstance().time}")
         ensureBackgroundThread {
+
+            val handler = CoroutineExceptionHandler { _, exception ->
+                Log.e(TAG, "Caught $exception")
+                jobFinished(params, true)
+            }
+
             val myCloudPhotoAPI = RetrofitHelper.getInstance(this)
-            GlobalScope.launch {
-                val response = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
-                if(response.isSuccessful){
-                    checkAllPhotoSync(response.body())
-                    jobFinished(params, false)
-                } else{
-                    Log.e(TAG, response.errorBody().toString())
-                    jobFinished(params, true)
+            CoroutineScope(Dispatchers.IO).launch(handler) {
+                    val response = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
+                    if(response.isSuccessful){
+                        checkAllPhotoSync(response.body())
+                        jobFinished(params, false)
+                    } else{
+                        Log.e(TAG, response.errorBody().toString())
+                        jobFinished(params, true)
+                    }
                 }
             }
-        }
         return true
     }
 

@@ -44,6 +44,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
+import java.nio.file.Paths
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.ArrayList
@@ -807,7 +808,7 @@ fun Context.getCachedMedia(path: String, getVideosOnly: Boolean = false, getImag
 fun Context.removeInvalidDBDirectories(dirs: ArrayList<Directory>? = null) {
     val dirsToCheck = dirs ?: directoryDao.getAll()
     val OTGPath = config.OTGPath
-    dirsToCheck.filter { !it.areFavorites() && !it.isRecycleBin() && !getDoesFilePathExist(it.path, OTGPath) && it.path != config.tempFolderPath }.forEach {
+    dirsToCheck.filter { !it.areFavorites() && !it.isRecycleBin() && !getDoesFilePathExist(it.path, OTGPath) && it.path != config.tempFolderPath && it.isCouldPath().not() }.forEach {
         try {
             directoryDao.deleteDirPath(it.path)
         } catch (ignored: Exception) {
@@ -827,7 +828,7 @@ fun Context.updateDBMediaPath(oldPath: String, newPath: String) {
 
 fun Context.updateDBDirectory(directory: Directory) {
     try {
-        directoryDao.updateDirectory(
+        val updated = directoryDao.updateDirectory(
             directory.path,
             directory.tmb,
             directory.mediaCnt,
@@ -837,6 +838,14 @@ fun Context.updateDBDirectory(directory: Directory) {
             directory.types,
             directory.sortValue
         )
+        if (updated == 0){
+            if (directory.location == LOCATION_CLOUD){
+                directory.path = Paths.get("/cloud", directory.path).toString()
+                directoryDao.insert(directory)
+            }
+
+        }
+
     } catch (ignored: Exception) {
         Log.e("UpdateDirectory", ignored.toString())
     }
@@ -1022,6 +1031,8 @@ fun Context.createDirectoryFromMedia(
         }?.path ?: ""
     }
 
+    val isOnCloudDirectory = thumbnail?.startsWith("http://") ?: false
+
     if (config.OTGPath.isNotEmpty() && thumbnail!!.startsWith(config.OTGPath)) {
         thumbnail = thumbnail!!.getOTGPublicPath(applicationContext)
     }
@@ -1034,9 +1045,10 @@ fun Context.createDirectoryFromMedia(
     val lastModified = if (isSortingAscending) Math.min(firstItem.modified, lastItem.modified) else Math.max(firstItem.modified, lastItem.modified)
     val dateTaken = if (isSortingAscending) Math.min(firstItem.taken, lastItem.taken) else Math.max(firstItem.taken, lastItem.taken)
     val size = if (getProperFileSize) curMedia.sumByLong { it.size } else 0L
+    val location = if (isOnCloudDirectory) LOCATION_CLOUD else getPathLocation(path)
     val mediaTypes = curMedia.getDirMediaTypes()
     val sortValue = getDirectorySortingValue(curMedia, path, dirName, size)
-    return Directory(null, path, thumbnail!!, dirName, curMedia.size, lastModified, dateTaken, size, getPathLocation(path), mediaTypes, sortValue)
+    return Directory(null, path, thumbnail!!, dirName, curMedia.size, lastModified, dateTaken, size, location, mediaTypes, sortValue)
 }
 
 fun Context.getDirectorySortingValue(media: ArrayList<Medium>, path: String, name: String, size: Long): String {
@@ -1095,11 +1107,6 @@ fun Context.updateDirectoryPath(path: String) {
         path, getImagesOnly, getVideosOnly, getProperDateTaken, getProperLastModified, getProperFileSize,
         favoritePaths, false, lastModifieds, dateTakens, null
     )
-
-//    val onCloudMedia = mediaDB.getOnCloudMediaFromPath(path)
-//    curMedia.addAll(onCloudMedia)
-//    mediaFetcher.sortMedia(curMedia, config.getFolderSorting(path))
-//
 
     val directory = createDirectoryFromMedia(path, curMedia, albumCovers, hiddenString, includedFolders, getProperFileSize, noMediaFolders)
     updateDBDirectory(directory)
