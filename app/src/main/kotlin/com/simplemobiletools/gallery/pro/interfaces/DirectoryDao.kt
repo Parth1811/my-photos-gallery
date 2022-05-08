@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
+import com.simplemobiletools.gallery.pro.helpers.LOCATION_CLOUD
 import com.simplemobiletools.gallery.pro.helpers.RECYCLE_BIN
 import com.simplemobiletools.gallery.pro.models.Directory
 
@@ -14,6 +15,9 @@ interface DirectoryDao {
 
     @Query("SELECT path, thumbnail, filename, media_count, last_modified, date_taken, size, location, media_types, sort_value FROM directories where path = :path")
     fun getDirectoryWithPath(path: String): Directory
+
+    @Query("SELECT path, thumbnail, filename, media_count, last_modified, date_taken, size, location, media_types, sort_value FROM directories where location = $LOCATION_CLOUD")
+    fun getCloudDirectories(): List<Directory>
 
     @Insert(onConflict = REPLACE)
     fun insert(directory: Directory)

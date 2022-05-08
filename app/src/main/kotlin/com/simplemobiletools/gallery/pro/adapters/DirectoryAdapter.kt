@@ -810,7 +810,14 @@ class DirectoryAdapter(
             dir_pin.beVisibleIf(pinnedFolders.contains(directory.path))
             dir_location.beVisibleIf(directory.location != LOCATION_INTERNAL)
             if (dir_location.isVisible()) {
-                dir_location.setImageResource(if (directory.location == LOCATION_SD) R.drawable.ic_sd_card_vector else R.drawable.ic_usb_vector)
+                val icon = if (directory.location == LOCATION_SD)
+                    R.drawable.ic_sd_card_vector
+                else if (directory.isCouldPath())
+                    R.drawable.ic_baseline_cloud
+                else
+                    R.drawable.ic_usb_vector
+
+                dir_location.setImageResource(icon)
             }
 
             photo_cnt.text = directory.subfoldersMediaCount.toString()

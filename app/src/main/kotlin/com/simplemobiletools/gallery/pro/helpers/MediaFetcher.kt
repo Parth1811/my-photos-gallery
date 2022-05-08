@@ -12,7 +12,6 @@ import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
 import android.text.format.DateFormat
 import com.simplemobiletools.commons.extensions.*
-import com.simplemobiletools.commons.extensions.getDoesFilePathExist
 import com.simplemobiletools.commons.helpers.*
 import com.simplemobiletools.gallery.pro.R
 import com.simplemobiletools.gallery.pro.extensions.*
@@ -101,6 +100,9 @@ class MediaFetcher(val context: Context) {
             val selectionArgs = getSelectionArgsQuery(filterMedia).toTypedArray()
             val cursor = context.contentResolver.query(uri, projection, selection, selectionArgs, null)
             folders.addAll(parseCursor(cursor!!))
+
+            val cloudDirectories = context.directoryDao.getCloudDirectories()
+            folders.addAll(cloudDirectories.map { it.path })
 
             val config = context.config
             val shouldShowHidden = config.shouldShowHidden

@@ -2,14 +2,15 @@ package com.simplemobiletools.gallery.pro.asynctasks
 
 import android.content.Context
 import android.os.AsyncTask
-import com.simplemobiletools.commons.helpers.*
+import com.simplemobiletools.commons.helpers.FAVORITES
+import com.simplemobiletools.commons.helpers.SORT_BY_DATE_MODIFIED
+import com.simplemobiletools.commons.helpers.SORT_BY_DATE_TAKEN
+import com.simplemobiletools.commons.helpers.SORT_BY_SIZE
 import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.extensions.getFavoritePaths
-import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.ThumbnailItem
-import java.util.*
 
 class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage: Boolean = false, val isPickVideo: Boolean = false,
                         val showAll: Boolean, val callback: (media: ArrayList<ThumbnailItem>) -> Unit) :
@@ -38,7 +39,7 @@ class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage
             val foldersToScan = mediaFetcher.getFoldersToScan().filter { it != RECYCLE_BIN && it != FAVORITES && !context.config.isFolderProtected(it) }
             val media = ArrayList<Medium>()
             foldersToScan.forEach {
-                val newMedia = mediaFetcher.getFilesFrom(it, isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize,
+                val newMedia = mediaFetcher.getFilesFrom(it.substringAfter("/cloud"), isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize,
                     favoritePaths, getVideoDurations, lastModifieds, dateTakens, null)
                 media.addAll(newMedia)
             }
@@ -46,8 +47,7 @@ class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage
             mediaFetcher.sortMedia(media, context.config.getFolderSorting(SHOW_ALL))
             media
         } else {
-
-            mediaFetcher.getFilesFrom(mPath, isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize, favoritePaths,
+            mediaFetcher.getFilesFrom(mPath.substringAfter("/cloud"), isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize, favoritePaths,
                 getVideoDurations, lastModifieds, dateTakens, null)
         }
 
