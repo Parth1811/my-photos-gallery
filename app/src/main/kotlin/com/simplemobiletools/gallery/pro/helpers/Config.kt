@@ -527,4 +527,8 @@ class Config(context: Context) : BaseConfig(context) {
     var myCloudToken: String
         get() = prefs.getString(MY_CLOUD_TOKEN, "")!!
         set(token) = prefs.edit().putString(MY_CLOUD_TOKEN, token).apply()
+
+    var useLocalServer: Boolean
+        get() = prefs.getBoolean(USE_LOCAL_SERVER, true)
+        set(value) = prefs.edit().putBoolean(USE_LOCAL_SERVER, value).apply()
 }

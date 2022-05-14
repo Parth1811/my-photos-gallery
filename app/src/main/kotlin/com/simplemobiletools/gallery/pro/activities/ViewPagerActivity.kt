@@ -335,7 +335,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             return
         }
 
-        if (!getDoesFilePathExist(mPath) && getPortraitPath() == "" && mPath.startsWith("http://").not()) {
+        if (!getDoesFilePathExist(mPath) && getPortraitPath() == "" && mPath.isCloudPath().not()) {
             finish()
             return
         }
@@ -368,7 +368,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
 
         val isShowingFavorites = intent.getBooleanExtra(SHOW_FAVORITES, false)
         val isShowingRecycleBin = intent.getBooleanExtra(SHOW_RECYCLE_BIN, false)
-        val isOnCloud = mPath.startsWith("http://")
+        val isOnCloud = mPath.isCloudPath()
         mDirectory = when {
             isShowingFavorites -> FAVORITES
             isShowingRecycleBin -> RECYCLE_BIN

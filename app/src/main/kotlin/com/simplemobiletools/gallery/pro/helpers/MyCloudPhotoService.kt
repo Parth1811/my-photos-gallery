@@ -8,17 +8,18 @@ import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.models.LoginRequest
 import com.simplemobiletools.gallery.pro.models.LoginResponse
 import com.simplemobiletools.gallery.pro.models.UserFiles
-import kotlinx.coroutines.GlobalScope
 import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.POST
 
 interface MyCloudPhotoAPI {
 
-    @GET("/files")
+    @GET("/files/")
     suspend fun getAllPhotos(@Header("Authorization") token: String): Response<List<UserFiles>>
 
     @POST("/auth/")
@@ -29,6 +30,7 @@ interface MyCloudPhotoAPI {
 class RetrofitHelper(context: Context) {
 
     val BASE_URL = "http://localhost:8000/"
+    val CLOUD_BASE_URL = "https://parth-home.tk/"
     var TOKEN = ""
     val TAG = "RetrofitHelper"
     private val username = "parth"
@@ -40,13 +42,18 @@ class RetrofitHelper(context: Context) {
     companion object {
         @Volatile private var INSTANCE: RetrofitHelper? = null
 
-        fun getInstance(context: Context): RetrofitHelper =
+        fun getInstance(context: Context, useLocalServer: Boolean = true): RetrofitHelper =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: RetrofitHelper(context).also {
-                    it.retrofit =  Retrofit.Builder().baseUrl(it.BASE_URL)
-                                        .addConverterFactory(GsonConverterFactory.create())
-                                        .build()
-
+                    if(!useLocalServer){
+                        it.retrofit = Retrofit.Builder().baseUrl(it.CLOUD_BASE_URL)
+                                                        .addConverterFactory(GsonConverterFactory.create())
+                                                        .build()
+                    } else {
+                        it.retrofit = Retrofit.Builder().baseUrl(it.BASE_URL)
+                                                        .addConverterFactory(GsonConverterFactory.create())
+                                                        .build()
+                    }
                     it.api = it.retrofit.create(MyCloudPhotoAPI::class.java)
                     it.TOKEN = "Token ${context.config.myCloudToken}"
                     it.ensureAuthToken(context)

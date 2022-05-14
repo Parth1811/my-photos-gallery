@@ -90,6 +90,7 @@ const val THUMBNAIL_SPACING = "thumbnail_spacing"
 const val FILE_ROUNDED_CORNERS = "file_rounded_corners"
 const val CUSTOM_FOLDERS_ORDER = "custom_folders_order"
 const val MY_CLOUD_TOKEN = "my_cloud_token"
+const val USE_LOCAL_SERVER = "use_local_server"
 
 // slideshow
 const val SLIDESHOW_INTERVAL = "slideshow_interval"
@@ -110,6 +111,7 @@ const val SLIDESHOW_ANIMATION_SLIDE = 1
 const val SLIDESHOW_ANIMATION_FADE = 2
 
 const val RECYCLE_BIN = "recycle_bin"
+const val ON_CLOUD = "cloud"
 const val SHOW_FAVORITES = "show_favorites"
 const val SHOW_RECYCLE_BIN = "show_recycle_bin"
 const val IS_IN_RECYCLE_BIN = "is_in_recycle_bin"

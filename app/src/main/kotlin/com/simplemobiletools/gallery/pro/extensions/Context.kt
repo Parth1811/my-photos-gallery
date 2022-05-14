@@ -1027,11 +1027,11 @@ fun Context.createDirectoryFromMedia(
     if (thumbnail == null) {
         val sortedMedia = grouped.filter { it is Medium }.toMutableList() as ArrayList<Medium>
         thumbnail = sortedMedia.firstOrNull {
-            getDoesFilePathExist(it.path, OTGPath) || it.path.startsWith("http://")
+            getDoesFilePathExist(it.path, OTGPath) || it.path.isCloudPath()
         }?.path ?: ""
     }
 
-    val isOnCloudDirectory = thumbnail?.startsWith("http://") ?: false
+    val isOnCloudDirectory = thumbnail?.isCloudPath() ?: false
 
     if (config.OTGPath.isNotEmpty() && thumbnail!!.startsWith(config.OTGPath)) {
         thumbnail = thumbnail!!.getOTGPublicPath(applicationContext)

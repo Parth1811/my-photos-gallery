@@ -12,12 +12,15 @@ import androidx.annotation.RequiresApi
 import com.ayush.retrofitexample.RetrofitHelper
 import com.simplemobiletools.commons.extensions.getParentPath
 import com.simplemobiletools.commons.helpers.ensureBackgroundThread
+import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 import com.simplemobiletools.gallery.pro.helpers.MediumState
+import com.simplemobiletools.gallery.pro.helpers.ON_CLOUD
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.UserFiles
 import kotlinx.coroutines.*
+import java.net.ConnectException
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -32,6 +35,7 @@ class MyCloudSyncerService : JobService(){
 
     fun scheduleJob(context: Context) {
         val componentName = ComponentName(context, MyCloudSyncerService::class.java)
+        context.config.useLocalServer = true
 
         val jobInfo = JobInfo.Builder(MY_CLOUD_SYNCER_JOB, componentName)
                             .setRequiresBatteryNotLow(true)
@@ -57,7 +61,7 @@ class MyCloudSyncerService : JobService(){
                     mediaDB.insert(Medium(
                     null,
                     userFile.name,
-                    "${RetrofitHelper.getInstance(this).BASE_URL}file/${userFile.storedFile}/",
+                    "$ON_CLOUD/file/${userFile.storedFile}/",
                     userFile.pathOnDevice.getParentPath(),
                     ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
                     ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,
@@ -86,22 +90,26 @@ class MyCloudSyncerService : JobService(){
         ensureBackgroundThread {
 
             val handler = CoroutineExceptionHandler { _, exception ->
-                Log.e(TAG, "Caught $exception")
+                Log.e(TAG, "Caught $exception, ${exception.stackTrace}")
+                if(exception is ConnectException){
+                    applicationContext.config.useLocalServer = false
+                }
                 jobFinished(params, true)
             }
 
-            val myCloudPhotoAPI = RetrofitHelper.getInstance(this)
             CoroutineScope(Dispatchers.IO).launch(handler) {
-                    val response = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
-                    if(response.isSuccessful){
-                        checkAllPhotoSync(response.body())
-                        jobFinished(params, false)
-                    } else{
-                        Log.e(TAG, response.errorBody().toString())
-                        jobFinished(params, true)
-                    }
+                val myCloudPhotoAPI = RetrofitHelper.getInstance(applicationContext, applicationContext.config.useLocalServer)
+                val response = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
+                if(response.isSuccessful){
+                    checkAllPhotoSync(response.body())
+                    jobFinished(params, false)
+                    applicationContext.config.useLocalServer = true
+                } else{
+                    Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
+                    jobFinished(params, true)
                 }
             }
+        }
         return true
     }
 

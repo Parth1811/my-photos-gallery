@@ -2,12 +2,15 @@ package com.simplemobiletools.gallery.pro.extensions
 
 import android.os.Environment
 import com.simplemobiletools.commons.helpers.NOMEDIA
+import com.simplemobiletools.gallery.pro.helpers.ON_CLOUD
 import java.io.File
 import java.io.IOException
 
 fun String.isThisOrParentIncluded(includedPaths: MutableSet<String>) = includedPaths.any { equals(it, true) } || includedPaths.any { "$this/".startsWith("$it/", true) }
 
 fun String.isThisOrParentExcluded(excludedPaths: MutableSet<String>) = excludedPaths.any { equals(it, true) } || excludedPaths.any { "$this/".startsWith("$it/", true) }
+
+fun String.isCloudPath() = this.startsWith(ON_CLOUD)
 
 // cache which folders contain .nomedia files to avoid checking them over and over again
 fun String.shouldFolderBeVisible(excludedPaths: MutableSet<String>, includedPaths: MutableSet<String>, showHidden: Boolean,
