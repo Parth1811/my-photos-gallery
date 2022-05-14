@@ -28,7 +28,20 @@
         android:gravity="end"
         android:background="@drawable/circle_black_background"
         android:src="@drawable/ic_star_vector"
-        android:visibility="gone" />
+        android:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/cloud"
+        android:layout_width="@dimen/favorite_list_icon_size"
+        android:layout_height="@dimen/favorite_list_icon_size"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/smaller_margin"
+        android:padding="@dimen/tiny_margin"
+        android:gravity="top"
+        android:background="@drawable/circle_black_background"
+        android:src="@drawable/ic_baseline_cloud"
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/medium_check"

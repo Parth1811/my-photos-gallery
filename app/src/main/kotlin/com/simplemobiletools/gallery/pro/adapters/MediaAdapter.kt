@@ -33,6 +33,7 @@ import com.simplemobiletools.gallery.pro.models.ThumbnailSection
 import kotlinx.android.synthetic.main.photo_item_grid.view.*
 import kotlinx.android.synthetic.main.thumbnail_section.view.*
 import kotlinx.android.synthetic.main.video_item_grid.view.*
+import kotlinx.android.synthetic.main.video_item_grid.view.cloud
 import kotlinx.android.synthetic.main.video_item_grid.view.favorite
 import kotlinx.android.synthetic.main.video_item_grid.view.media_item_holder
 import kotlinx.android.synthetic.main.video_item_grid.view.medium_check
@@ -567,6 +568,7 @@ class MediaAdapter(
             media_item_holder.setPadding(padding, padding, padding, padding)
 
             favorite.beVisibleIf(medium.isFavorite && config.markFavoriteItems)
+            cloud.beVisibleIf(medium.path.isCloudPath())
 
             play_portrait_outline?.beVisibleIf(medium.isVideo() || medium.isPortrait())
             if (medium.isVideo()) {
@@ -622,8 +624,9 @@ class MediaAdapter(
             }
 
             if (loadImageInstantly) {
+                val type = if (medium.state == MediumState.ON_CLOUD) TYPE_CLOUD else medium.type
                 activity.loadImage(
-                    medium.type, path, medium_thumbnail, scrollHorizontally, animateGifs, cropThumbnails, roundedCorners, medium.getKey(), rotatedImagePaths
+                    type, path, medium_thumbnail, scrollHorizontally, animateGifs, cropThumbnails, roundedCorners, medium.getKey(), rotatedImagePaths
                 )
             } else {
                 medium_thumbnail.setImageDrawable(null)
@@ -631,8 +634,9 @@ class MediaAdapter(
                 delayHandler.postDelayed({
                     val isVisible = visibleItemPaths.contains(medium.path)
                     if (isVisible) {
+                        val type = if (medium.state == MediumState.ON_CLOUD) TYPE_CLOUD else medium.type
                         activity.loadImage(
-                            medium.type, path, medium_thumbnail, scrollHorizontally, animateGifs, cropThumbnails, roundedCorners,
+                            type, path, medium_thumbnail, scrollHorizontally, animateGifs, cropThumbnails, roundedCorners,
                             medium.getKey(), rotatedImagePaths
                         )
                     }

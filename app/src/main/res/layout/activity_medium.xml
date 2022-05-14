@@ -8,7 +8,7 @@
     <com.simplemobiletools.commons.views.MyViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <include
         android:id="@+id/bottom_actions"
@@ -18,7 +18,7 @@
         android:id="@+id/top_shadow"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_status_action_height"
-        android:contentDescription="@null"
-        android:background="@drawable/gradient_background_flipped"/>
+        android:background="@drawable/gradient_background_flipped"
+        android:contentDescription="@null" />
 
 </RelativeLayout>

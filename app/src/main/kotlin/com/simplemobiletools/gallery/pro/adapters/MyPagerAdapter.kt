@@ -8,6 +8,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
 import com.simplemobiletools.gallery.pro.activities.ViewPagerActivity
+import com.simplemobiletools.gallery.pro.extensions.isCloudPath
+import com.simplemobiletools.gallery.pro.extensions.makeRemotePath
 import com.simplemobiletools.gallery.pro.fragments.PhotoFragment
 import com.simplemobiletools.gallery.pro.fragments.VideoFragment
 import com.simplemobiletools.gallery.pro.fragments.ViewPagerFragment
@@ -26,6 +28,9 @@ class MyPagerAdapter(val activity: ViewPagerActivity, fm: FragmentManager, val m
         val bundle = Bundle()
         bundle.putSerializable(MEDIUM, medium)
         bundle.putBoolean(SHOULD_INIT_FRAGMENT, shouldInitFragment)
+
+        if(medium.path.isCloudPath()) medium.path = medium.path.makeRemotePath(activity.applicationContext)
+
         val fragment = if (medium.isVideo()) {
             VideoFragment()
         } else {

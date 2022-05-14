@@ -5,6 +5,8 @@ package com.ayush.retrofitexample
 import android.content.Context
 import android.util.Log
 import com.simplemobiletools.gallery.pro.extensions.config
+import com.simplemobiletools.gallery.pro.helpers.CLOUD_BASE_URL
+import com.simplemobiletools.gallery.pro.helpers.LOCAL_BASE_URL
 import com.simplemobiletools.gallery.pro.models.LoginRequest
 import com.simplemobiletools.gallery.pro.models.LoginResponse
 import com.simplemobiletools.gallery.pro.models.UserFiles
@@ -29,8 +31,6 @@ interface MyCloudPhotoAPI {
 
 class RetrofitHelper(context: Context) {
 
-    val BASE_URL = "http://localhost:8000/"
-    val CLOUD_BASE_URL = "https://parth-home.tk/"
     var TOKEN = ""
     val TAG = "RetrofitHelper"
     private val username = "parth"
@@ -46,11 +46,11 @@ class RetrofitHelper(context: Context) {
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: RetrofitHelper(context).also {
                     if(!useLocalServer){
-                        it.retrofit = Retrofit.Builder().baseUrl(it.CLOUD_BASE_URL)
+                        it.retrofit = Retrofit.Builder().baseUrl(CLOUD_BASE_URL)
                                                         .addConverterFactory(GsonConverterFactory.create())
                                                         .build()
                     } else {
-                        it.retrofit = Retrofit.Builder().baseUrl(it.BASE_URL)
+                        it.retrofit = Retrofit.Builder().baseUrl(LOCAL_BASE_URL)
                                                         .addConverterFactory(GsonConverterFactory.create())
                                                         .build()
                     }

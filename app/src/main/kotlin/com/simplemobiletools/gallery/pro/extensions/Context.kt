@@ -14,6 +14,7 @@ import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
 import android.util.Log
 import android.widget.ImageView
+import com.ayush.retrofitexample.RetrofitHelper
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
@@ -447,6 +448,8 @@ fun Context.loadImage(
         } else {
             loadJpg(path, target, cropThumbnails, roundCorners, signature, skipMemoryCacheAtPaths)
         }
+    } else if (type == TYPE_CLOUD) {
+        loadJpg(path.makeRemotePath(this), target, cropThumbnails, roundCorners, signature, skipMemoryCacheAtPaths)
     } else if (type == TYPE_GIFS) {
         if (!animateGifs) {
             loadStaticGIF(path, target, cropThumbnails, roundCorners, signature, skipMemoryCacheAtPaths)

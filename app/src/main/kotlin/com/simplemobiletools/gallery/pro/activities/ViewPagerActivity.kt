@@ -340,6 +340,10 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             return
         }
 
+        if(mPath.isCloudPath()){
+            mPath = mPath.makeRemotePath(this)
+        }
+
         showSystemUI(true)
 
         if (intent.getBooleanExtra(SKIP_AUTHENTICATION, false)) {
@@ -437,6 +441,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             path.isSvg() -> TYPE_SVGS
             path.isRawFast() -> TYPE_RAWS
             path.isPortrait() -> TYPE_PORTRAITS
+            path.isCloudPath() -> TYPE_CLOUD
             else -> TYPE_IMAGES
         }
     }
@@ -1255,6 +1260,11 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
                 }
             } else if (medium.path.equals(mPath, true)) {
                 return i
+            } else if (mPath.isCloudPath()){
+                //TODO(Parth): Better condition for figuring out index
+                if(medium.path.makeRemotePath(applicationContext) == mPath){
+                    return i
+                }
             }
         }
         return mPos

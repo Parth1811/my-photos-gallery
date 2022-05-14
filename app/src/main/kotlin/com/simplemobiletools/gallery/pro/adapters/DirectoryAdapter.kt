@@ -752,6 +752,7 @@ class DirectoryAdapter(
                 directory.tmb.isGif() -> TYPE_GIFS
                 directory.tmb.isRawFast() -> TYPE_RAWS
                 directory.tmb.isSvg() -> TYPE_SVGS
+                directory.tmb.isCloudPath() -> TYPE_CLOUD
                 else -> TYPE_IMAGES
             }
 

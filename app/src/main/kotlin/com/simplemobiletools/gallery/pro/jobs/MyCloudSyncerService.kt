@@ -103,7 +103,6 @@ class MyCloudSyncerService : JobService(){
                 if(response.isSuccessful){
                     checkAllPhotoSync(response.body())
                     jobFinished(params, false)
-                    applicationContext.config.useLocalServer = true
                 } else{
                     Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
                     jobFinished(params, true)

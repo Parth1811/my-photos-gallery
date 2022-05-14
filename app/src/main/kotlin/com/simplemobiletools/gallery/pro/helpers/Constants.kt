@@ -110,6 +110,10 @@ const val SLIDESHOW_ANIMATION_NONE = 0
 const val SLIDESHOW_ANIMATION_SLIDE = 1
 const val SLIDESHOW_ANIMATION_FADE = 2
 
+// CLOUD URLS
+const val LOCAL_BASE_URL = "http://localhost:8000/"
+const val CLOUD_BASE_URL = "https://parth-home.tk/"
+
 const val RECYCLE_BIN = "recycle_bin"
 const val ON_CLOUD = "cloud"
 const val SHOW_FAVORITES = "show_favorites"

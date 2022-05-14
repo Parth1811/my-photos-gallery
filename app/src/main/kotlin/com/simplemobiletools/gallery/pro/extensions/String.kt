@@ -1,7 +1,11 @@
 package com.simplemobiletools.gallery.pro.extensions
 
+import android.content.Context
 import android.os.Environment
+import android.util.Log
 import com.simplemobiletools.commons.helpers.NOMEDIA
+import com.simplemobiletools.gallery.pro.helpers.CLOUD_BASE_URL
+import com.simplemobiletools.gallery.pro.helpers.LOCAL_BASE_URL
 import com.simplemobiletools.gallery.pro.helpers.ON_CLOUD
 import java.io.File
 import java.io.IOException
@@ -10,7 +14,18 @@ fun String.isThisOrParentIncluded(includedPaths: MutableSet<String>) = includedP
 
 fun String.isThisOrParentExcluded(excludedPaths: MutableSet<String>) = excludedPaths.any { equals(it, true) } || excludedPaths.any { "$this/".startsWith("$it/", true) }
 
-fun String.isCloudPath() = this.startsWith(ON_CLOUD)
+fun String.isCloudPath() = this.startsWith(ON_CLOUD) or this.startsWith("http")
+
+fun String.makeRemotePath(context: Context): String {
+    Log.d("MAKE_REMOTE_PATH", "$this, ${context.config.useLocalServer}")
+    val remotePath = this.removePrefix(ON_CLOUD)
+    if (this.startsWith("http")) return this
+    return if(context.config.useLocalServer){
+        LOCAL_BASE_URL + remotePath.removePrefix("/")
+    } else {
+        CLOUD_BASE_URL + remotePath.removePrefix("/")
+    }
+}
 
 // cache which folders contain .nomedia files to avoid checking them over and over again
 fun String.shouldFolderBeVisible(excludedPaths: MutableSet<String>, includedPaths: MutableSet<String>, showHidden: Boolean,
