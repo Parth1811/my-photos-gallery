@@ -21,6 +21,8 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -508,10 +510,19 @@ fun Context.loadPng(
         .priority(Priority.LOW)
         .format(DecodeFormat.PREFER_ARGB_8888)
 
+    val glideUrl = if (path.isCloudPath()){
+        GlideUrl(
+            path,
+            LazyHeaders.Builder()
+                .addHeader("Authorization", "Token ${applicationContext.config.myCloudToken}")
+                .build()
+        )} else
+        path
+
     if (cropThumbnails) options.centerCrop() else options.fitCenter()
     var builder = Glide.with(applicationContext)
         .asBitmap()
-        .load(path)
+        .load(glideUrl)
         .apply(options)
         .listener(object : RequestListener<Bitmap> {
             override fun onLoadFailed(e: GlideException?, model: Any?, targetBitmap: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
@@ -553,9 +564,18 @@ fun Context.loadJpg(
         .priority(Priority.LOW)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
 
+    val glideUrl = if (path.isCloudPath()){
+        GlideUrl(
+            path,
+            LazyHeaders.Builder()
+                .addHeader("Authorization", "Token ${applicationContext.config.myCloudToken}")
+                .build()
+        )} else
+            path
+
     if (cropThumbnails) options.centerCrop() else options.fitCenter()
     var builder = Glide.with(applicationContext)
-        .load(path)
+        .load(glideUrl)
         .apply(options)
         .transition(DrawableTransitionOptions.withCrossFade())
 
@@ -784,7 +804,7 @@ fun Context.getCachedMedia(path: String, getVideosOnly: Boolean = false, getImag
             val mediaToDelete = ArrayList<Medium>()
             // creating a new thread intentionally, do not reuse the common background thread
             Thread {
-                media.filter { !getDoesFilePathExist(it.path, OTGPath) }.forEach {
+                media.filter { !getDoesFilePathExist(it.path, OTGPath) && it.path.isCloudPath().not() }.forEach {
                     if (it.path.startsWith(recycleBinPath)) {
                         deleteDBPath(it.path)
                     } else {

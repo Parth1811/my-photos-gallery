@@ -31,6 +31,8 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders.Builder
 import com.bumptech.glide.load.resource.bitmap.Rotate
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
@@ -50,6 +52,7 @@ import com.simplemobiletools.gallery.pro.activities.PanoramaPhotoActivity
 import com.simplemobiletools.gallery.pro.activities.PhotoActivity
 import com.simplemobiletools.gallery.pro.adapters.PortraitPhotosAdapter
 import com.simplemobiletools.gallery.pro.extensions.config
+import com.simplemobiletools.gallery.pro.extensions.isCloudPath
 import com.simplemobiletools.gallery.pro.extensions.saveRotatedImageToFile
 import com.simplemobiletools.gallery.pro.extensions.sendFakeClick
 import com.simplemobiletools.gallery.pro.helpers.*
@@ -444,8 +447,18 @@ class PhotoFragment : ViewPagerFragment() {
             options.diskCacheStrategy(DiskCacheStrategy.NONE)
         }
 
-        Glide.with(context!!)
-            .load(path)
+        val glideUrl = if (path.isCloudPath()){
+            GlideUrl(
+                path,
+                Builder()
+                    .addHeader("Authorization", "Token ${context?.config?.myCloudToken}")
+                    .build()
+            )
+        } else
+            path
+
+        Glide.with(requireContext())
+            .load(glideUrl)
             .apply(options)
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {

@@ -58,10 +58,10 @@ class MyCloudSyncerService : JobService(){
             response?.forEach{ userFile ->
 
                 affectedFolderPaths.add(userFile.pathOnDevice.getParentPath())
-                    mediaDB.insert(Medium(
+                val medium = Medium(
                     null,
                     userFile.name,
-                    "$ON_CLOUD/file/${userFile.storedFile}/",
+                    "$ON_CLOUD/file/${userFile.id}/",
                     userFile.pathOnDevice.getParentPath(),
                     ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
                     ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,
@@ -72,7 +72,9 @@ class MyCloudSyncerService : JobService(){
                     userFile.isFavorite,
                     0L,
                     0L
-                ))
+                )
+                Log.d(TAG, medium.toString())
+                mediaDB.insert(medium)
             }
 
             affectedFolderPaths.forEach{

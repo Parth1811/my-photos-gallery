@@ -1004,7 +1004,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
                     }.start()
                 }
 
-                if (!directory.isRecycleBin()) {
+                if (!directory.isRecycleBin() && !directory.isCouldPath()) {
                     getCachedMedia(directory.path, getVideosOnly, getImagesOnly) {
                         val mediaToDelete = ArrayList<Medium>()
                         it.forEach {
@@ -1265,7 +1265,7 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
         val invalidDirs = ArrayList<Directory>()
         val OTGPath = config.OTGPath
         dirs.filter { !it.areFavorites() && !it.isRecycleBin() && !it.isCouldPath() }.forEach {
-            if (!getDoesFilePathExist(it.path, OTGPath)) {
+            if (!getDoesFilePathExist(it.path, OTGPath) && it.location != LOCATION_CLOUD) {
                 invalidDirs.add(it)
             } else if (it.path != config.tempFolderPath && !isRPlus()) {
                 // avoid calling file.list() or listfiles() on Android 11+, it became way too slow

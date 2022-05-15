@@ -379,7 +379,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             isOnCloud -> "/storage/emulated/0/DCIM/Camera"
             else -> mPath.getParentPath()
         }
-        supportActionBar?.title = mPath.getFilenameFromPath()
+        supportActionBar?.title = mMediaFiles[getPositionInList(mMediaFiles)].name
 
         view_pager.onGlobalLayout {
             if (!isDestroyed) {
@@ -837,11 +837,17 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             toggleFavorite()
         }
 
-        bottom_edit.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_EDIT != 0 && currentMedium?.isSVG() == false)
+        bottom_edit.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_EDIT != 0 && currentMedium?.isSVG() == false && currentMedium.path.isCloudPath().not())
         bottom_edit.setOnLongClickListener { toast(R.string.edit); true }
         bottom_edit.setOnClickListener {
             openEditor(getCurrentPath())
         }
+
+        bottom_cloud_download.beVisibleIf(currentMedium?.path?.isCloudPath() ?: false)
+//        bottom_edit.setOnLongClickListener { toast(R.string.edit); true }
+//        bottom_edit.setOnClickListener {
+//            openEditor(getCurrentPath())
+//        }
 
         bottom_share.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_SHARE != 0)
         bottom_share.setOnLongClickListener { toast(R.string.share); true }
@@ -1262,7 +1268,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
                 return i
             } else if (mPath.isCloudPath()){
                 //TODO(Parth): Better condition for figuring out index
-                if(medium.path.makeRemotePath(applicationContext) == mPath){
+                if(medium.path.substringAfter("/file/") == mPath.substringAfter("/file/")){
                     return i
                 }
             }
@@ -1383,7 +1389,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
     private fun updateActionbarTitle() {
         runOnUiThread {
             if (mPos < getCurrentMedia().size) {
-                supportActionBar?.title = getCurrentMedia()[mPos].path.getFilenameFromPath()
+                supportActionBar?.title = getCurrentMedia()[mPos].name
             }
         }
     }
