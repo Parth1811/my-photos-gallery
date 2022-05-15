@@ -14,7 +14,17 @@ fun String.isThisOrParentIncluded(includedPaths: MutableSet<String>) = includedP
 
 fun String.isThisOrParentExcluded(excludedPaths: MutableSet<String>) = excludedPaths.any { equals(it, true) } || excludedPaths.any { "$this/".startsWith("$it/", true) }
 
-fun String.isCloudPath() = this.startsWith(ON_CLOUD) or this.startsWith("http")
+fun String.isCloudPath() = this.startsWith(ON_CLOUD) || this.startsWith("http")
+
+fun String.isCloudPathForFile() = (this.startsWith(ON_CLOUD) || this.startsWith("http")) && this.contains("/file/")
+
+fun String.getMediumFullPath(): String {
+    if (this.substringAfter("/file/") != this){
+        return ON_CLOUD + "/thumbnail/file/" + this.substringAfter("/file/")
+    } else {
+        return this
+    }
+}
 
 fun String.makeRemotePath(context: Context): String {
     Log.d("MAKE_REMOTE_PATH", "$this, ${context.config.useLocalServer}")

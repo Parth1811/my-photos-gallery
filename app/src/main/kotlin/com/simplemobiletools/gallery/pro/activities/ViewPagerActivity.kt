@@ -370,15 +370,6 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             config.isThirdPartyIntent = true
         }
 
-        val isShowingFavorites = intent.getBooleanExtra(SHOW_FAVORITES, false)
-        val isShowingRecycleBin = intent.getBooleanExtra(SHOW_RECYCLE_BIN, false)
-        val isOnCloud = mPath.isCloudPath()
-        mDirectory = when {
-            isShowingFavorites -> FAVORITES
-            isShowingRecycleBin -> RECYCLE_BIN
-            isOnCloud -> "/storage/emulated/0/DCIM/Camera"
-            else -> mPath.getParentPath()
-        }
         supportActionBar?.title = mMediaFiles[getPositionInList(mMediaFiles)].name
 
         view_pager.onGlobalLayout {
@@ -1214,11 +1205,25 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
     }
 
     private fun refreshViewPager() {
-        if (config.getFolderSorting(mDirectory) and SORT_BY_RANDOM == 0) {
-            GetMediaAsynctask(applicationContext, mDirectory, false, false, mShowAll) {
-                gotMedia(it, refetchViewPagerPosition = true)
-            }.execute()
+        ensureBackgroundThread {
+            val isShowingFavorites = intent.getBooleanExtra(SHOW_FAVORITES, false)
+            val isShowingRecycleBin = intent.getBooleanExtra(SHOW_RECYCLE_BIN, false)
+            val isOnCloud = mPath.isCloudPath()
+
+            mDirectory = when {
+                isShowingFavorites -> FAVORITES
+                isShowingRecycleBin -> RECYCLE_BIN
+                isOnCloud -> mediaDB.getParentDirectoryFromPath(mPath.getMediumFullPath())
+                else -> mPath.getParentPath()
+            }
+
+            if (config.getFolderSorting(mDirectory) and SORT_BY_RANDOM == 0) {
+                GetMediaAsynctask(applicationContext, mDirectory, false, false, mShowAll) {
+                    gotMedia(it, refetchViewPagerPosition = true)
+                }.execute()
+            }
         }
+
     }
 
     private fun gotMedia(thumbnailItems: ArrayList<ThumbnailItem>, ignorePlayingVideos: Boolean = false, refetchViewPagerPosition: Boolean = false) {

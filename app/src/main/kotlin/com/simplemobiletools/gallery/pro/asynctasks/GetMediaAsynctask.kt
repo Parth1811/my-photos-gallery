@@ -39,7 +39,7 @@ class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage
             val foldersToScan = mediaFetcher.getFoldersToScan().filter { it != RECYCLE_BIN && it != FAVORITES && !context.config.isFolderProtected(it) }
             val media = ArrayList<Medium>()
             foldersToScan.forEach {
-                val newMedia = mediaFetcher.getFilesFrom(it.substringAfter("/cloud"), isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize,
+                val newMedia = mediaFetcher.getFilesFrom(it.substringAfter(ON_CLOUD), isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize,
                     favoritePaths, getVideoDurations, lastModifieds, dateTakens, null)
                 media.addAll(newMedia)
             }
@@ -47,7 +47,7 @@ class GetMediaAsynctask(val context: Context, val mPath: String, val isPickImage
             mediaFetcher.sortMedia(media, context.config.getFolderSorting(SHOW_ALL))
             media
         } else {
-            mediaFetcher.getFilesFrom(mPath.substringAfter("/cloud"), isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize, favoritePaths,
+            mediaFetcher.getFilesFrom(mPath.substringAfter(ON_CLOUD), isPickImage, isPickVideo, getProperDateTaken, getProperLastModified, getProperFileSize, favoritePaths,
                 getVideoDurations, lastModifieds, dateTakens, null)
         }
 

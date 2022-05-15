@@ -863,7 +863,7 @@ fun Context.updateDBDirectory(directory: Directory) {
         )
         if (updated == 0){
             if (directory.location == LOCATION_CLOUD){
-                directory.path = Paths.get("/cloud", directory.path).toString()
+                directory.path = Paths.get(ON_CLOUD, directory.path).toString()
                 directoryDao.insert(directory)
             }
 
