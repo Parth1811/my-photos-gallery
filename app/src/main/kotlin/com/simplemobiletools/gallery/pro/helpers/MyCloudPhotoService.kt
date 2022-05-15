@@ -9,6 +9,7 @@ import com.simplemobiletools.gallery.pro.helpers.CLOUD_BASE_URL
 import com.simplemobiletools.gallery.pro.helpers.LOCAL_BASE_URL
 import com.simplemobiletools.gallery.pro.models.LoginRequest
 import com.simplemobiletools.gallery.pro.models.LoginResponse
+import com.simplemobiletools.gallery.pro.models.UserFileCount
 import com.simplemobiletools.gallery.pro.models.UserFiles
 import retrofit2.Call
 import retrofit2.Response
@@ -23,6 +24,9 @@ interface MyCloudPhotoAPI {
 
     @GET("/files/")
     suspend fun getAllPhotos(@Header("Authorization") token: String): Response<List<UserFiles>>
+
+    @GET("/file-count/")
+    suspend fun getAllPhotosCount(@Header("Authorization") token: String): Response<UserFileCount>
 
     @POST("/auth/")
 //    @FormUrlEncoded

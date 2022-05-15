@@ -18,6 +18,7 @@ import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 import com.simplemobiletools.gallery.pro.helpers.MediumState
 import com.simplemobiletools.gallery.pro.helpers.ON_CLOUD
 import com.simplemobiletools.gallery.pro.models.Medium
+import com.simplemobiletools.gallery.pro.models.UserFileCount
 import com.simplemobiletools.gallery.pro.models.UserFiles
 import kotlinx.coroutines.*
 import java.net.ConnectException
@@ -51,38 +52,37 @@ class MyCloudSyncerService : JobService(){
         return jobs.any { it.id == MY_CLOUD_SYNCER_JOB }
     }
 
-    private fun checkAllPhotoSync(response: List<UserFiles>?){
+    private fun shouldPhotoSync(response: UserFileCount?): Boolean{
         val currentCloudFilesNumber = mediaDB.getNumberOfCloudFiles()
-        if (currentCloudFilesNumber < response?.size ?: 0){
-            val affectedFolderPaths = HashSet<String>()
-            response?.forEach{ userFile ->
+        return currentCloudFilesNumber < response?.count ?: 0
+    }
 
-                affectedFolderPaths.add(userFile.pathOnDevice.getParentPath())
-                val medium = Medium(
-                    null,
-                    userFile.name,
-                    "$ON_CLOUD/thumbnail/file/${userFile.id}/",
-                    userFile.pathOnDevice.getParentPath(),
-                    ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
-                    ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,
-                    userFile.size,
-                    userFile.type.value,
-                    MediumState.ON_CLOUD,
-                    userFile.videoDuration,
-                    userFile.isFavorite,
-                    0L,
-                    0L
-                )
-                Log.d(TAG, medium.toString())
-                mediaDB.insert(medium)
-            }
+    private fun syncAllPhotos(response: List<UserFiles>?){
+        val affectedFolderPaths = HashSet<String>()
+        response?.forEach{ userFile ->
 
-            affectedFolderPaths.forEach{
-                updateDirectoryPath(it)
-            }
+            affectedFolderPaths.add(userFile.pathOnDevice.getParentPath())
+            val medium = Medium(
+                null,
+                userFile.name,
+                "$ON_CLOUD/thumbnail/file/${userFile.id}/",
+                userFile.pathOnDevice.getParentPath(),
+                ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
+                ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,
+                userFile.size,
+                userFile.type.value,
+                MediumState.ON_CLOUD,
+                userFile.videoDuration,
+                userFile.isFavorite,
+                0L,
+                0L
+            )
+            Log.d(TAG, medium.toString())
+            mediaDB.insert(medium)
+        }
 
-        } else {
-            Log.e(TAG, "Some Problem with syncing")
+        affectedFolderPaths.forEach{
+            updateDirectoryPath(it)
         }
     }
 
@@ -101,9 +101,17 @@ class MyCloudSyncerService : JobService(){
 
             CoroutineScope(Dispatchers.IO).launch(handler) {
                 val myCloudPhotoAPI = RetrofitHelper.getInstance(applicationContext, applicationContext.config.useLocalServer)
-                val response = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
+                val response = myCloudPhotoAPI.api.getAllPhotosCount(myCloudPhotoAPI.TOKEN)
                 if(response.isSuccessful){
-                    checkAllPhotoSync(response.body())
+                    if(shouldPhotoSync(response.body())) {
+                        val allPhotoResponse = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
+                        if (allPhotoResponse.isSuccessful) {
+                            syncAllPhotos(allPhotoResponse.body())
+                        } else {
+                            Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
+                            jobFinished(params, true)
+                        }
+                    }
                     jobFinished(params, false)
                 } else{
                     Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")

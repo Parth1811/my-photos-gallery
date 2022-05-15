@@ -1,8 +1,6 @@
 package com.simplemobiletools.gallery.pro.models
 
 import com.google.gson.annotations.SerializedName
-import java.sql.Time
-import java.time.LocalDateTime
 
 data class UserFiles(
     val id: Int,
@@ -15,6 +13,10 @@ data class UserFiles(
     @SerializedName("last_modified") val lastModified: String,
     @SerializedName("date_taken") val dateTaken: String,
     @SerializedName("is_favorite") val isFavorite: Boolean
+)
+
+data class UserFileCount(
+    val count: Long
 )
 
 enum class FileTypes(val value: Int) {
