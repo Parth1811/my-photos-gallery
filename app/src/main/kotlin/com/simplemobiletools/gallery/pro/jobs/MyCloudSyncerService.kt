@@ -61,7 +61,7 @@ class MyCloudSyncerService : JobService(){
                 val medium = Medium(
                     null,
                     userFile.name,
-                    "$ON_CLOUD/file/${userFile.id}/",
+                    "$ON_CLOUD/thumbnail/file/${userFile.id}/",
                     userFile.pathOnDevice.getParentPath(),
                     ZonedDateTime.parse(userFile.lastModified).toEpochSecond() * 1000,
                     ZonedDateTime.parse(userFile.dateTaken).toEpochSecond() * 1000,

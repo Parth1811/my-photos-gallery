@@ -449,7 +449,7 @@ class PhotoFragment : ViewPagerFragment() {
 
         val glideUrl = if (path.isCloudPath()){
             GlideUrl(
-                path,
+                path.replace("/thumbnail/", "/"),
                 Builder()
                     .addHeader("Authorization", "Token ${context?.config?.myCloudToken}")
                     .build()
