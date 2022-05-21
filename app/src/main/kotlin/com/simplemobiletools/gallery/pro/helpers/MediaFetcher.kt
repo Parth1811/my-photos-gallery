@@ -70,6 +70,8 @@ class MediaFetcher(val context: Context) {
                             }
                         }
                     }
+                    curMedia.addAll(context.mediaDB.getFavorites().filter { it.path.isCloudPath() })
+
                 }
                 curMedia.addAll(newMedia)
             }

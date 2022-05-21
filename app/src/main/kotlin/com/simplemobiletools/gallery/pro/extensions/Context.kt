@@ -1,6 +1,5 @@
 package com.simplemobiletools.gallery.pro.extensions
 
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -14,7 +13,6 @@ import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
 import android.util.Log
 import android.widget.ImageView
-import com.ayush.retrofitexample.RetrofitHelper
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
@@ -34,7 +32,6 @@ import com.simplemobiletools.commons.extensions.*
 import com.simplemobiletools.commons.helpers.*
 import com.simplemobiletools.commons.views.MySquareImageView
 import com.simplemobiletools.gallery.pro.R
-import com.simplemobiletools.gallery.pro.activities.SettingsActivity
 import com.simplemobiletools.gallery.pro.asynctasks.GetMediaAsynctask
 import com.simplemobiletools.gallery.pro.databases.GalleryDatabase
 import com.simplemobiletools.gallery.pro.helpers.*
@@ -47,11 +44,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
-import java.nio.file.Paths
-import java.util.*
-import kotlin.Comparator
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.collections.set
 
 val Context.audioManager get() = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -861,13 +853,12 @@ fun Context.updateDBDirectory(directory: Directory) {
             directory.types,
             directory.sortValue
         )
-        if (updated == 0){
-            if (directory.location == LOCATION_CLOUD){
-                directory.path = Paths.get(ON_CLOUD, directory.path).toString()
-                directoryDao.insert(directory)
-            }
-
-        }
+//        if (updated == 0){
+//            if (directory.location == LOCATION_CLOUD){
+//                directory.path = Paths.get(ON_CLOUD, directory.path).toString()
+//                directoryDao.insert(directory)
+//            }
+//        }
 
     } catch (ignored: Exception) {
         Log.e("UpdateDirectory", ignored.toString())
@@ -886,7 +877,13 @@ fun Context.getFavoritePaths(): ArrayList<String> {
     }
 }
 
-fun Context.getFavoriteFromPath(path: String) = Favorite(null, path, path.getFilenameFromPath(), path.getParentPath())
+fun Context.getFavoriteFromPath(path: String): Favorite{
+    if(path.isCloudPath()){
+        val medium = mediaDB.getMediumFromPath(path)
+        return Favorite(null, path, medium.name, medium.parentPath)
+    }
+    return Favorite(null, path, path.getFilenameFromPath(), path.getParentPath())
+}
 
 fun Context.updateFavorite(path: String, isFavorite: Boolean) {
     try {

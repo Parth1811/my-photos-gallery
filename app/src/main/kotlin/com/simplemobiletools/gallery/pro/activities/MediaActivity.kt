@@ -589,7 +589,7 @@ class MediaActivity : SimpleActivity(), MediaOperationsListener {
                         if (mPath == FAVORITES && getDoesFilePathExist(it.path)) {
                             favoritesDB.deleteFavoritePath(it.path)
                             mediaDB.updateFavorite(it.path, false)
-                        } else if (mPath.isCloudPath().not()){
+                        } else if (it.path.isCloudPath().not()){
                             mediaDB.deleteMediumPath(it.path)
                         }
                     }

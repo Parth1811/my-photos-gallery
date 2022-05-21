@@ -951,12 +951,13 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
         val medium = getCurrentMedium() ?: return
         medium.isFavorite = !medium.isFavorite
         ensureBackgroundThread {
-            updateFavorite(medium.path, medium.isFavorite)
+            updateFavorite(medium.path.getMediumFullPath(), medium.isFavorite)
             if (medium.isFavorite) {
                 mFavoritePaths.add(medium.path)
             } else {
                 mFavoritePaths.remove(medium.path)
             }
+            mediaDB.updateFavorite(medium.path.getMediumFullPath(), medium.isFavorite)
             invalidateOptionsMenu()
         }
     }

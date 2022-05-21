@@ -21,6 +21,7 @@ import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.UserFileCount
 import com.simplemobiletools.gallery.pro.models.UserFiles
 import kotlinx.coroutines.*
+import java.io.File
 import java.net.ConnectException
 import java.time.ZonedDateTime
 import java.util.*
@@ -77,11 +78,14 @@ class MyCloudSyncerService : JobService(){
                 0L,
                 0L
             )
+
             Log.d(TAG, medium.toString())
             mediaDB.insert(medium)
         }
 
         affectedFolderPaths.forEach{
+            val folderPath = File(it)
+            if(folderPath.exists().not()) folderPath.mkdirs()
             updateDirectoryPath(it)
         }
     }
