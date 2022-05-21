@@ -13,10 +13,12 @@ import com.ayush.retrofitexample.RetrofitHelper
 import com.simplemobiletools.commons.extensions.getParentPath
 import com.simplemobiletools.commons.helpers.ensureBackgroundThread
 import com.simplemobiletools.gallery.pro.extensions.config
+import com.simplemobiletools.gallery.pro.extensions.favoritesDB
 import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 import com.simplemobiletools.gallery.pro.helpers.MediumState
 import com.simplemobiletools.gallery.pro.helpers.ON_CLOUD
+import com.simplemobiletools.gallery.pro.models.Favorite
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.UserFileCount
 import com.simplemobiletools.gallery.pro.models.UserFiles
@@ -79,7 +81,8 @@ class MyCloudSyncerService : JobService(){
                 0L
             )
 
-            Log.d(TAG, medium.toString())
+            if(userFile.isFavorite)
+                favoritesDB.insert(Favorite(null, medium.path, medium.name, medium.parentPath))
             mediaDB.insert(medium)
         }
 

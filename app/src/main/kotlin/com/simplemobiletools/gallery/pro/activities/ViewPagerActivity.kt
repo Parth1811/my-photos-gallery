@@ -183,7 +183,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_viewpager, menu)
         val currentMedium = getCurrentMedium() ?: return true
-        currentMedium.isFavorite = mFavoritePaths.contains(currentMedium.path)
+        currentMedium.isFavorite = mFavoritePaths.contains(currentMedium.path.getMediumFullPath())
         val visibleBottomActions = if (config.bottomActions) config.visibleBottomActions else 0
 
         val rotationDegrees = getCurrentPhotoFragment()?.mCurrentRotationDegrees ?: 0
