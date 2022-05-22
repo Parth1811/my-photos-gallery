@@ -58,6 +58,7 @@ import kotlinx.android.synthetic.main.activity_medium.*
 import kotlinx.android.synthetic.main.bottom_actions.*
 import java.io.File
 import java.io.OutputStream
+import java.nio.file.Paths.get
 
 class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, ViewPagerFragment.FragmentListener {
     private val REQUEST_VIEW_VIDEO = 1
@@ -835,10 +836,13 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
         }
 
         bottom_cloud_download.beVisibleIf(currentMedium?.path?.isCloudPath() ?: false)
-//        bottom_edit.setOnLongClickListener { toast(R.string.edit); true }
-//        bottom_edit.setOnClickListener {
-//            openEditor(getCurrentPath())
-//        }
+        bottom_cloud_download.setOnLongClickListener { toast(R.string.download_from_cloud); true }
+        bottom_cloud_download.setOnClickListener {
+            currentMedium?.let { medium ->
+                if(medium.path.isCloudPath())
+                    downloadCloudFile(medium.path.removeThumbnailInCloudPath(), get(medium.parentPath, medium.name).toString())
+            }
+        }
 
         bottom_share.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_SHARE != 0)
         bottom_share.setOnLongClickListener { toast(R.string.share); true }

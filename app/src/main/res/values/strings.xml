@@ -433,6 +433,7 @@
     </string>
     <string name="my_cloud_setting">My Cloud Setting</string>
     <string name="token">Token</string>
+    <string name="download_from_cloud">Download From Cloud</string>
 
     <!--
         Haven't found some strings? There's more at

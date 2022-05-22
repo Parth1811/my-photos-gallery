@@ -2,11 +2,12 @@ package com.simplemobiletools.gallery.pro.extensions
 
 import android.annotation.TargetApi
 import android.app.Activity
-import android.content.ActivityNotFoundException
+import android.app.DownloadManager
+import android.app.DownloadManager.Request
 import android.content.ContentProviderOperation
 import android.content.ContentValues
+import android.content.Context.DOWNLOAD_SERVICE
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -19,11 +20,12 @@ import android.provider.MediaStore.Files
 import android.provider.MediaStore.Images
 import android.provider.Settings
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.exifinterface.media.ExifInterface
+import com.ayush.retrofitexample.RetrofitHelper
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -48,6 +50,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 fun Activity.sharePath(path: String) {
     sharePathIntent(path, BuildConfig.APPLICATION_ID)
@@ -81,6 +84,29 @@ fun Activity.openEditor(path: String, forceChooser: Boolean = false) {
 fun Activity.launchCamera() {
     val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
     launchActivityIntent(intent)
+}
+
+fun Activity.downloadCloudFile(uri: String, destination: String) {
+    val request = Request(Uri.parse(uri))
+    request.allowScanningByMediaScanner()
+    request.setAllowedNetworkTypes(Request.NETWORK_WIFI or Request.NETWORK_MOBILE)
+    request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+
+    val destFile = File(destination)
+    if (destFile.exists()){
+        Toast.makeText(this.applicationContext, "Already Downloaded", Toast.LENGTH_LONG).show()
+        return
+    }
+
+    request.setDestinationUri(Uri.fromFile(destFile))
+    request.setTitle(destination.getFilenameFromPath())
+
+    val myCloudPhotoAPI = RetrofitHelper.getInstance(applicationContext, applicationContext.config.useLocalServer)
+    request.addRequestHeader("Authorization", myCloudPhotoAPI.TOKEN)
+
+    val dm = this.getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+    dm.enqueue(request)
+    Toast.makeText(this.applicationContext, "Downloading ${destination.getFilenameFromPath()}", Toast.LENGTH_LONG).show()
 }
 
 fun SimpleActivity.launchSettings() {

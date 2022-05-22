@@ -17,6 +17,8 @@ fun String.isCloudPath() = this.startsWith(ON_CLOUD) || this.startsWith("http")
 
 fun String.isCloudPathForFile() = (this.startsWith(ON_CLOUD) || this.startsWith("http")) && this.contains("/file/")
 
+fun String.removeThumbnailInCloudPath() = this.replace("/thumbnail/", "/")
+
 fun String.getMediumFullPath(): String {
     if (this.substringAfter("/file/") != this){
         return ON_CLOUD + "/thumbnail/file/" + this.substringAfter("/file/")

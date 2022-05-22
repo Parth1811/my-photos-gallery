@@ -51,10 +51,7 @@ import com.simplemobiletools.gallery.pro.R
 import com.simplemobiletools.gallery.pro.activities.PanoramaPhotoActivity
 import com.simplemobiletools.gallery.pro.activities.PhotoActivity
 import com.simplemobiletools.gallery.pro.adapters.PortraitPhotosAdapter
-import com.simplemobiletools.gallery.pro.extensions.config
-import com.simplemobiletools.gallery.pro.extensions.isCloudPath
-import com.simplemobiletools.gallery.pro.extensions.saveRotatedImageToFile
-import com.simplemobiletools.gallery.pro.extensions.sendFakeClick
+import com.simplemobiletools.gallery.pro.extensions.*
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.svg.SvgSoftwareLayerSetter
@@ -449,7 +446,7 @@ class PhotoFragment : ViewPagerFragment() {
 
         val glideUrl = if (path.isCloudPath()){
             GlideUrl(
-                path.replace("/thumbnail/", "/"),
+                path.removeThumbnailInCloudPath(),
                 Builder()
                     .addHeader("Authorization", "Token ${context?.config?.myCloudToken}")
                     .build()
