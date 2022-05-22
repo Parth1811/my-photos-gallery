@@ -853,12 +853,11 @@ fun Context.updateDBDirectory(directory: Directory) {
             directory.types,
             directory.sortValue
         )
-//        if (updated == 0){
-//            if (directory.location == LOCATION_CLOUD){
-//                directory.path = Paths.get(ON_CLOUD, directory.path).toString()
-//                directoryDao.insert(directory)
-//            }
-//        }
+        if (updated == 0){
+            if (directory.location == LOCATION_CLOUD){
+                directoryDao.insert(directory)
+            }
+        }
 
     } catch (ignored: Exception) {
         Log.e("UpdateDirectory", ignored.toString())
@@ -879,7 +878,7 @@ fun Context.getFavoritePaths(): ArrayList<String> {
 
 fun Context.getFavoriteFromPath(path: String): Favorite{
     if(path.isCloudPath()){
-        val medium = mediaDB.getMediumFromPath(path)
+        val medium = mediaDB.getMediumFromPath(path.getMediumFullPath())!!
         return Favorite(null, path, medium.name, medium.parentPath)
     }
     return Favorite(null, path, path.getFilenameFromPath(), path.getParentPath())

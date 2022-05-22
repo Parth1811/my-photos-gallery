@@ -2,7 +2,6 @@ package com.simplemobiletools.gallery.pro.extensions
 
 import android.content.Context
 import android.os.Environment
-import android.util.Log
 import com.simplemobiletools.commons.helpers.NOMEDIA
 import com.simplemobiletools.gallery.pro.helpers.CLOUD_BASE_URL
 import com.simplemobiletools.gallery.pro.helpers.LOCAL_BASE_URL
@@ -27,7 +26,6 @@ fun String.getMediumFullPath(): String {
 }
 
 fun String.makeRemotePath(context: Context): String {
-    Log.d("MAKE_REMOTE_PATH", "$this, ${context.config.useLocalServer}")
     val remotePath = this.removePrefix(ON_CLOUD)
     if (this.startsWith("http")) return this
     return if(context.config.useLocalServer){

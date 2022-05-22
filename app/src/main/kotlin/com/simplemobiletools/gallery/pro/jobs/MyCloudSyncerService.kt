@@ -16,15 +16,20 @@ import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.extensions.favoritesDB
 import com.simplemobiletools.gallery.pro.extensions.mediaDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
-import com.simplemobiletools.gallery.pro.helpers.MediumState
-import com.simplemobiletools.gallery.pro.helpers.ON_CLOUD
+import com.simplemobiletools.gallery.pro.helpers.*
+import com.simplemobiletools.gallery.pro.helpers.MediumState.BACKED_UP
 import com.simplemobiletools.gallery.pro.models.Favorite
 import com.simplemobiletools.gallery.pro.models.Medium
 import com.simplemobiletools.gallery.pro.models.UserFileCount
 import com.simplemobiletools.gallery.pro.models.UserFiles
 import kotlinx.coroutines.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.net.ConnectException
+import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -65,7 +70,9 @@ class MyCloudSyncerService : JobService(){
         response?.forEach{ userFile ->
 
             affectedFolderPaths.add(userFile.pathOnDevice.getParentPath())
-            val medium = Medium(
+            val alreadyPresentMedium = mediaDB.getMediumFromPath(userFile.pathOnDevice)
+            alreadyPresentMedium?.state = BACKED_UP
+            val medium = alreadyPresentMedium ?: Medium(
                 null,
                 userFile.name,
                 "$ON_CLOUD/thumbnail/file/${userFile.id}/",
@@ -124,6 +131,47 @@ class MyCloudSyncerService : JobService(){
                     Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
                     jobFinished(params, true)
                 }
+
+                // Upload not backedUp files
+                mediaDB.getNotBackedUpPath().forEach {
+                    Log.d(TAG, "Uploading FIle ${it}\n ${Instant.ofEpochMilli(it.modified)} --" +
+                        " ${Instant.ofEpochMilli(it.taken)}")
+                    val type = when(it.type){
+                        TYPE_IMAGES -> "TYPE_IMAGES"
+                        TYPE_VIDEOS -> "TYPE_VIDEOS"
+                        TYPE_GIFS -> "TYPE_GIFS"
+                        TYPE_RAWS -> "TYPE_RAWS"
+                        TYPE_SVGS -> "TYPE_SVGS"
+                        TYPE_PORTRAITS -> "TYPE_PORTRAITS"
+                        TYPE_CLOUD -> "TYPE_CLOUD"
+                        else -> "TYPE_IMAGES"
+                    }
+                    val file = File(it.path)
+
+                    val uploadResponse = myCloudPhotoAPI.api.uploadPhoto(
+                        myCloudPhotoAPI.TOKEN,
+                        it.size,
+                        type.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        it.path.toRequestBody("text/plain".toMediaTypeOrNull()),
+                        it.videoDuration,
+                        Instant.ofEpochMilli(it.modified).toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+                        Instant.ofEpochMilli(it.taken).toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+                        it.isFavorite,
+                        MultipartBody.Part.createFormData(
+                            "file",
+                            file.name,
+                            file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                        )
+                    )
+
+                    if(uploadResponse.isSuccessful){
+                        it.state = BACKED_UP
+                        mediaDB.insert(it)
+                    } else{
+                        Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
+                    }
+                }
+
             }
         }
         return true

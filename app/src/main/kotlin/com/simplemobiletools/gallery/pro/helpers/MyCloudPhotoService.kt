@@ -7,18 +7,14 @@ import android.util.Log
 import com.simplemobiletools.gallery.pro.extensions.config
 import com.simplemobiletools.gallery.pro.helpers.CLOUD_BASE_URL
 import com.simplemobiletools.gallery.pro.helpers.LOCAL_BASE_URL
-import com.simplemobiletools.gallery.pro.models.LoginRequest
-import com.simplemobiletools.gallery.pro.models.LoginResponse
-import com.simplemobiletools.gallery.pro.models.UserFileCount
-import com.simplemobiletools.gallery.pro.models.UserFiles
+import com.simplemobiletools.gallery.pro.models.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface MyCloudPhotoAPI {
 
@@ -31,6 +27,21 @@ interface MyCloudPhotoAPI {
     @POST("/auth/")
 //    @FormUrlEncoded
     fun getAuthToken(@Body request: LoginRequest): Call<LoginResponse>
+
+    @Multipart
+    @POST("/files/")
+    suspend fun uploadPhoto(
+        @Header("Authorization") token: String,
+        @Part("size") size: Long,
+        @Part("type") type: RequestBody,
+        @Part("path_on_device") path: RequestBody,
+        @Part("video_duration") videoDuration: Int,
+        @Part("last_modified") lastModified: RequestBody,
+        @Part("date_taken") dateTaken: RequestBody,
+        @Part("is_favorite") isFavorite: Boolean,
+        @Part file: MultipartBody.Part
+    ): Response<UploadFileStatus>
+
 }
 
 class RetrofitHelper(context: Context) {

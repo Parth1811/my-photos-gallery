@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
+import com.simplemobiletools.gallery.pro.helpers.MediumState
 import com.simplemobiletools.gallery.pro.models.Medium
 
 @Dao
@@ -13,7 +14,7 @@ interface MediumDao {
     fun getMediaFromPath(path: String): List<Medium>
 
     @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE deleted_ts = 0 AND full_path = :path COLLATE NOCASE")
-    fun getMediumFromPath(path: String): Medium
+    fun getMediumFromPath(path: String): Medium?
 
     @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE deleted_ts = 0 AND is_favorite = 1")
     fun getFavorites(): List<Medium>
@@ -30,7 +31,7 @@ interface MediumDao {
     @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE deleted_ts < :timestmap AND deleted_ts != 0")
     fun getOldRecycleBinItems(timestmap: Long): List<Medium>
 
-    @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE state != 'CREATED'")
+    @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE state == 'CREATED'")
     fun getNotBackedUpPath(): List<Medium>
 
     @Query("SELECT filename, full_path, parent_path, last_modified, date_taken, size, type, state, video_duration, is_favorite, deleted_ts, media_store_id FROM media WHERE state == 'ON_CLOUD'")
@@ -59,6 +60,9 @@ interface MediumDao {
 
     @Query("UPDATE OR REPLACE media SET filename = :newFilename, full_path = :newFullPath, parent_path = :newParentPath WHERE full_path = :oldPath COLLATE NOCASE")
     fun updateMedium(newFilename: String, newFullPath: String, newParentPath: String, oldPath: String)
+
+    @Query("UPDATE media SET state = :state WHERE full_path = :path COLLATE NOCASE")
+    fun updateMediumState(path: String, state: MediumState)
 
     @Query("UPDATE OR REPLACE media SET full_path = :newPath, deleted_ts = :deletedTS WHERE full_path = :oldPath COLLATE NOCASE")
     fun updateDeleted(newPath: String, deletedTS: Long, oldPath: String)

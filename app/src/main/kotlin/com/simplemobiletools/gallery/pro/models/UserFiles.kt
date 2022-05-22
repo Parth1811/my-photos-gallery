@@ -1,6 +1,7 @@
 package com.simplemobiletools.gallery.pro.models
 
 import com.google.gson.annotations.SerializedName
+import okhttp3.MultipartBody
 
 data class UserFiles(
     val id: Int,
@@ -17,6 +18,21 @@ data class UserFiles(
 
 data class UserFileCount(
     val count: Long
+)
+
+data class UploadFile(
+    val file: MultipartBody.Part,
+    val size: Long,
+    val type: String,
+    @SerializedName("path_on_device") val path: String,
+    @SerializedName("video_duration") val videoDuration: Int,
+    @SerializedName("last_modified") val lastModified: String,
+    @SerializedName("date_taken") val dateTaken: String,
+    @SerializedName("is_favorite") val isFavorite: Boolean
+)
+
+data class UploadFileStatus(
+    val status: String
 )
 
 enum class FileTypes(val value: Int) {
