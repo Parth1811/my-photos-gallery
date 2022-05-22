@@ -34,6 +34,7 @@ import com.simplemobiletools.gallery.pro.adapters.DirectoryAdapter
 import com.simplemobiletools.gallery.pro.databases.GalleryDatabase
 import com.simplemobiletools.gallery.pro.dialogs.ChangeSortingDialog
 import com.simplemobiletools.gallery.pro.dialogs.ChangeViewTypeDialog
+import com.simplemobiletools.gallery.pro.dialogs.CloudLoginDialog
 import com.simplemobiletools.gallery.pro.dialogs.FilterMediaDialog
 import com.simplemobiletools.gallery.pro.extensions.*
 import com.simplemobiletools.gallery.pro.helpers.*
@@ -99,7 +100,6 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
             startNewPhotoFetcher()
         }
 
-        startMyCloudSyncer()
 
         mIsPickImageIntent = isPickImageIntent(intent)
         mIsPickVideoIntent = isPickVideoIntent(intent)
@@ -154,6 +154,16 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
                 toast(R.string.no_storage_permissions)
                 finish()
             }
+        }
+
+        if (config.userName.isEmpty()){
+            CloudLoginDialog(this@MainActivity) { username, password ->
+                config.userName = username
+                config.passwrod = password
+                startMyCloudSyncer()
+            }
+        } else{
+            startMyCloudSyncer()
         }
 
     }

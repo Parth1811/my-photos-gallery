@@ -91,6 +91,8 @@ const val FILE_ROUNDED_CORNERS = "file_rounded_corners"
 const val CUSTOM_FOLDERS_ORDER = "custom_folders_order"
 const val MY_CLOUD_TOKEN = "my_cloud_token"
 const val USE_LOCAL_SERVER = "use_local_server"
+const val MY_CLOUD_USERNAME = "my_cloud_username"
+const val MY_CLOUD_PASSWORD = "my_cloud_password"
 
 // slideshow
 const val SLIDESHOW_INTERVAL = "slideshow_interval"

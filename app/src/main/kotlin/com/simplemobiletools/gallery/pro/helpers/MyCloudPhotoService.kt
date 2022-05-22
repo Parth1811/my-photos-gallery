@@ -48,8 +48,8 @@ class RetrofitHelper(context: Context) {
 
     var TOKEN = ""
     val TAG = "RetrofitHelper"
-    private val username = "parth"
-    private val password = "s+r0ngPa554@photos"
+//    private val username = "parth"
+//    private val password = "s+r0ngPa554@photos"
 
     private lateinit var retrofit: Retrofit
     lateinit var api: MyCloudPhotoAPI
@@ -79,10 +79,14 @@ class RetrofitHelper(context: Context) {
 
     fun ensureAuthToken(context: Context){
         if(context.config.myCloudToken.isBlank()){
+            if(context.config.userName.isBlank()){
+                return
+            }
+
             val response = api.getAuthToken(
                 LoginRequest(
-                    username = username,
-                    password = password
+                    username = context.config.userName,
+                    password = context.config.passwrod
             )).execute()
 
             if(response.isSuccessful){

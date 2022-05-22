@@ -51,7 +51,7 @@ class MyCloudSyncerService : JobService(){
 
     fun scheduleJob(context: Context) {
         val componentName = ComponentName(context, MyCloudSyncerService::class.java)
-        context.config.useLocalServer = true
+        context.config.useLocalServer = false
         createNotificationChannel(context)
 
         val jobInfo = JobInfo.Builder(MY_CLOUD_SYNCER_JOB, componentName)
@@ -123,6 +123,11 @@ class MyCloudSyncerService : JobService(){
 
             CoroutineScope(Dispatchers.IO).launch(handler) {
                 val myCloudPhotoAPI = RetrofitHelper.getInstance(applicationContext, applicationContext.config.useLocalServer)
+                if (myCloudPhotoAPI.TOKEN.isBlank()){
+                    jobFinished(params, true)
+                    return@launch
+                }
+
                 val response = myCloudPhotoAPI.api.getAllPhotosCount(myCloudPhotoAPI.TOKEN)
                 if(response.isSuccessful){
                     if(shouldPhotoSync(response.body())) {
