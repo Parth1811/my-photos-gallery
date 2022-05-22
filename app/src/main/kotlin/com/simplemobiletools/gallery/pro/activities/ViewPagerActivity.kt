@@ -844,13 +844,13 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             }
         }
 
-        bottom_share.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_SHARE != 0)
+        bottom_share.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_SHARE != 0 && currentMedium?.path?.isCloudPath()?.not() ?: true)
         bottom_share.setOnLongClickListener { toast(R.string.share); true }
         bottom_share.setOnClickListener {
             shareMediumPath(getCurrentPath())
         }
 
-        bottom_delete.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_DELETE != 0)
+        bottom_delete.beVisibleIf(visibleBottomActions and BOTTOM_ACTION_DELETE != 0 && currentMedium?.path?.isCloudPath()?.not() ?: true)
         bottom_delete.setOnLongClickListener { toast(R.string.delete); true }
         bottom_delete.setOnClickListener {
             checkDeleteConfirmation()
@@ -1401,6 +1401,7 @@ class ViewPagerActivity : SimpleActivity(), ViewPager.OnPageChangeListener, View
             if (mPos < getCurrentMedia().size) {
                 supportActionBar?.title = getCurrentMedia()[mPos].name
             }
+            initBottomActions()
         }
     }
 
