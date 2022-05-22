@@ -202,12 +202,15 @@ class MyCloudSyncerService : JobService(){
                 }
 
                 Log.d(TAG, "Uploading Complete")
-                notificationBuilder.setContentTitle("Upload Complete")
-                                    .setContentTitle("Uploaded $sum files")
-                                    .setOngoing(false)
-                                    .setProgress(0, 0, false)
-                notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
-
+                if(sum == 0){
+                    notifyManager.cancel(UPLOAD_NOTIFICATION_ID)
+                } else {
+                    notificationBuilder.setContentTitle("Upload Complete")
+                                        .setContentTitle("Uploaded $sum files")
+                                        .setOngoing(false)
+                                        .setProgress(0, 0, false)
+                    notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
+                }
 
             }
         }
