@@ -1,5 +1,7 @@
 package com.simplemobiletools.gallery.pro.jobs
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.job.JobInfo
 import android.app.job.JobParameters
 import android.app.job.JobScheduler
@@ -9,13 +11,15 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.ayush.retrofitexample.RetrofitHelper
+import com.simplemobiletools.commons.extensions.getFilenameFromPath
 import com.simplemobiletools.commons.extensions.getParentPath
 import com.simplemobiletools.commons.helpers.ensureBackgroundThread
-import com.simplemobiletools.gallery.pro.extensions.config
-import com.simplemobiletools.gallery.pro.extensions.favoritesDB
-import com.simplemobiletools.gallery.pro.extensions.mediaDB
-import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
+import com.simplemobiletools.commons.helpers.isOreoPlus
+import com.simplemobiletools.gallery.pro.R
+import com.simplemobiletools.gallery.pro.extensions.*
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.helpers.MediumState.BACKED_UP
 import com.simplemobiletools.gallery.pro.models.Favorite
@@ -40,11 +44,15 @@ class MyCloudSyncerService : JobService(){
     }
 
     private val TAG = "MyCloudSyncerService"
+    private val NOTIFICATION_CHANNEL_ID = "upload"
+    private val NOTIFICATION_CHANNEL_NAME = "Uploading Files"
+    private val UPLOAD_NOTIFICATION_ID = 1
     private var isCancelled = false
 
     fun scheduleJob(context: Context) {
         val componentName = ComponentName(context, MyCloudSyncerService::class.java)
         context.config.useLocalServer = true
+        createNotificationChannel(context)
 
         val jobInfo = JobInfo.Builder(MY_CLOUD_SYNCER_JOB, componentName)
                             .setRequiresBatteryNotLow(true)
@@ -133,9 +141,15 @@ class MyCloudSyncerService : JobService(){
                 }
 
                 // Upload not backedUp files
-                mediaDB.getNotBackedUpPath().forEach {
-                    Log.d(TAG, "Uploading FIle ${it}\n ${Instant.ofEpochMilli(it.modified)} --" +
-                        " ${Instant.ofEpochMilli(it.taken)}")
+                val notBackedUpFiles = mediaDB.getNotBackedUpPath().filter{ it.path.startsWith(RECYCLE_BIN).not() && it.path.isCloudPath().not() }
+                val totalFiles = notBackedUpFiles.size
+                val notifyManager = NotificationManagerCompat.from(applicationContext)
+                val notificationBuilder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_baseline_cloud_upload)
+                var sum = 0
+
+                notBackedUpFiles.forEachIndexed { index, it ->
+                    Log.d(TAG, "Uploading FIle $it")
                     val type = when(it.type){
                         TYPE_IMAGES -> "TYPE_IMAGES"
                         TYPE_VIDEOS -> "TYPE_VIDEOS"
@@ -146,31 +160,49 @@ class MyCloudSyncerService : JobService(){
                         TYPE_CLOUD -> "TYPE_CLOUD"
                         else -> "TYPE_IMAGES"
                     }
+
+                    notificationBuilder.setContentTitle("Uploading Media.... ${(index + 1) * 100 / totalFiles}%")
+                        .setProgress(totalFiles, index + 1, false)
+                        .setOngoing(true)
+                        .setStyle(NotificationCompat.BigTextStyle()
+                            .bigText("Uploading ${it.path.getFilenameFromPath()} (${index + 1}/$totalFiles)"))
+                    notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
+
                     val file = File(it.path)
-
-                    val uploadResponse = myCloudPhotoAPI.api.uploadPhoto(
-                        myCloudPhotoAPI.TOKEN,
-                        it.size,
-                        type.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        it.path.toRequestBody("text/plain".toMediaTypeOrNull()),
-                        it.videoDuration,
-                        Instant.ofEpochMilli(it.modified).toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                        Instant.ofEpochMilli(it.taken).toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-                        it.isFavorite,
-                        MultipartBody.Part.createFormData(
-                            "file",
-                            file.name,
-                            file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                    if (file.exists()) {
+                        val uploadResponse = myCloudPhotoAPI.api.uploadPhoto(
+                            myCloudPhotoAPI.TOKEN,
+                            it.size,
+                            type.toRequestBody("text/plain".toMediaTypeOrNull()),
+                            it.path.toRequestBody("text/plain".toMediaTypeOrNull()),
+                            it.videoDuration,
+                            Instant.ofEpochMilli(it.modified).toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+                            Instant.ofEpochMilli(it.taken).toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+                            it.isFavorite,
+                            MultipartBody.Part.createFormData(
+                                "file",
+                                file.name,
+                                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+                            )
                         )
-                    )
 
-                    if(uploadResponse.isSuccessful){
-                        it.state = BACKED_UP
-                        mediaDB.insert(it)
-                    } else{
-                        Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
+                        if (uploadResponse.isSuccessful) {
+                            it.state = BACKED_UP
+                            mediaDB.insert(it)
+                            sum++
+                        } else {
+                            Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
+                        }
                     }
                 }
+
+                Log.d(TAG, "Uploading Complete")
+                notificationBuilder.setContentTitle("Upload Complete")
+                                    .setContentTitle("Uploaded $sum files")
+                                    .setOngoing(false)
+                                    .setProgress(0, 0, false)
+                notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
+
 
             }
         }
@@ -183,5 +215,15 @@ class MyCloudSyncerService : JobService(){
         return true
     }
 
-
+    fun createNotificationChannel(context: Context){
+        if(isOreoPlus()){
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                NOTIFICATION_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 }
