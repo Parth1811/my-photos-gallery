@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.simplemobiletools.gallery.pro",
+  "variantName": "fossRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 360,
+      "versionName": "6.23.1",
+      "outputFile": "gallery-360-foss-release.apk"
+    }
+  ],
+  "elementType": "File"
+}

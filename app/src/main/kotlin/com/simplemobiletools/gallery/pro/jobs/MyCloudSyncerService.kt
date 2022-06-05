@@ -118,6 +118,15 @@ class MyCloudSyncerService : JobService(){
                 if(exception is ConnectException){
                     applicationContext.config.useLocalServer = false
                 }
+
+                val notifyManager = NotificationManagerCompat.from(applicationContext)
+                val notificationBuilder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_baseline_cloud_upload)
+                notificationBuilder.setContentTitle("Upload Error")
+                    .setOngoing(false)
+                    .setContentText("$exception, ${exception.stackTrace}")
+                    .setProgress(0, 0, false)
+                notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
                 jobFinished(params, true)
             }
 

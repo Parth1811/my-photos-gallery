@@ -9,12 +9,15 @@ import com.simplemobiletools.gallery.pro.helpers.CLOUD_BASE_URL
 import com.simplemobiletools.gallery.pro.helpers.LOCAL_BASE_URL
 import com.simplemobiletools.gallery.pro.models.*
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
+import java.util.concurrent.TimeUnit.SECONDS
+
 
 interface MyCloudPhotoAPI {
 
@@ -60,13 +63,21 @@ class RetrofitHelper(context: Context) {
         fun getInstance(context: Context, useLocalServer: Boolean = true): RetrofitHelper =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: RetrofitHelper(context).also {
+                    val okHttpClient  = OkHttpClient.Builder()
+                                                    .readTimeout(0, SECONDS)
+                                                    .writeTimeout(0, SECONDS)
+                                                    .connectTimeout(30, SECONDS)
+                                                    .build()
+
                     if(!useLocalServer){
                         it.retrofit = Retrofit.Builder().baseUrl(CLOUD_BASE_URL)
                                                         .addConverterFactory(GsonConverterFactory.create())
+                                                        .client(okHttpClient)
                                                         .build()
                     } else {
                         it.retrofit = Retrofit.Builder().baseUrl(LOCAL_BASE_URL)
                                                         .addConverterFactory(GsonConverterFactory.create())
+                                                        .client(okHttpClient)
                                                         .build()
                     }
                     it.api = it.retrofit.create(MyCloudPhotoAPI::class.java)
