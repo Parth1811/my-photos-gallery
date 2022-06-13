@@ -1,9 +1,12 @@
 package com.simplemobiletools.gallery.pro.workers
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build.VERSION_CODES
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
 import androidx.core.app.NotificationCompat.Builder
 import androidx.core.app.NotificationManagerCompat
@@ -13,6 +16,7 @@ import androidx.work.NetworkType.CONNECTED
 import com.ayush.retrofitexample.RetrofitHelper
 import com.simplemobiletools.commons.extensions.getFilenameFromPath
 import com.simplemobiletools.commons.extensions.getParentPath
+import com.simplemobiletools.commons.helpers.isOreoPlus
 import com.simplemobiletools.gallery.pro.R.drawable
 import com.simplemobiletools.gallery.pro.extensions.*
 import com.simplemobiletools.gallery.pro.helpers.*
@@ -38,14 +42,31 @@ import java.util.concurrent.TimeUnit.HOURS
 @RequiresApi(VERSION_CODES.O)
 open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineWorker(context, params) {
 
-    private val TAG = "MyCloudSyncerWorker"
-    private val NOTIFICATION_CHANNEL_ID = "upload"
-    private val NOTIFICATION_CHANNEL_NAME = "Uploading Files"
-    private val UPLOAD_NOTIFICATION_ID = 1
     private var isCancelled = false
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     companion object {
+        private val TAG = "MyCloudSyncerWorker"
+        private val NOTIFICATION_CHANNEL_ID = "upload"
+        private val NOTIFICATION_CHANNEL_NAME = "Uploading Files"
+        private val UPLOAD_NOTIFICATION_ID = 1
+
+        fun createNotificationChannel(context: Context){
+            if(isOreoPlus()){
+                val channel = NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    NOTIFICATION_CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_LOW
+                )
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.createNotificationChannel(channel)
+            }
+        }
+
         fun setUpWorker(context: Context){
+
+            createNotificationChannel(context)
+
             val constraints = Constraints.Builder()
                 .setRequiresBatteryNotLow(true)
                 .setRequiredNetworkType(CONNECTED)
@@ -102,6 +123,9 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
     }
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+
+        setForeground(createForegroundInfo())
+
         Log.d(TAG, "Starting Syncing Worker ${Calendar.getInstance().time}")
 
             try{
@@ -132,8 +156,6 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                 val notBackedUpFiles = applicationContext.mediaDB.getNotBackedUpPath().filter{ it.path.startsWith(RECYCLE_BIN).not() && it.path.isCloudPath().not() }
                 val totalFiles = notBackedUpFiles.size
                 val notifyManager = NotificationManagerCompat.from(applicationContext)
-                val notificationBuilder = Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-                        .setSmallIcon(drawable.ic_baseline_cloud_upload)
                 var sum = 0
 
                 notBackedUpFiles.forEachIndexed { index, it ->
@@ -149,12 +171,13 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                         else -> "TYPE_IMAGES"
                     }
 
-                    notificationBuilder.setContentTitle("Uploading Media.... ${(index + 1) * 100 / totalFiles}%")
+                    val notification = getNotificationBuilder().setContentTitle("Uploading Media.... ${(index + 1) * 100 / totalFiles}%")
                             .setProgress(totalFiles, index + 1, false)
                             .setOngoing(true)
                             .setStyle(BigTextStyle()
                                 .bigText("Uploading ${it.path.getFilenameFromPath()} (${index + 1}/$totalFiles)"))
-                    notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
+                            .build()
+                    notifyManager.notify(UPLOAD_NOTIFICATION_ID, notification)
 
                     val file = File(it.path)
                     if (file.exists()) {
@@ -188,11 +211,12 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                 if(sum == 0){
                     notifyManager.cancel(UPLOAD_NOTIFICATION_ID)
                 } else {
-                    notificationBuilder.setContentTitle("Upload Complete")
+                    val notification = getNotificationBuilder().setContentTitle("Upload Complete")
                             .setContentTitle("Uploaded $sum files")
                             .setOngoing(false)
                             .setProgress(0, 0, false)
-                    notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
+                            .build()
+                    notifyManager.notify(UPLOAD_NOTIFICATION_ID, notification)
                 }
             }
             catch (exception: Exception){
@@ -202,18 +226,39 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                 }
 
                 val notifyManager = NotificationManagerCompat.from(applicationContext)
-                val notificationBuilder = Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-                        .setSmallIcon(drawable.ic_baseline_cloud_upload)
-                notificationBuilder.setContentTitle("Upload Error")
+
+                val notification = getNotificationBuilder().setContentTitle("Upload Error")
                         .setOngoing(false)
                         .setContentText("$exception, ${exception.stackTrace}")
                         .setProgress(0, 0, false)
-                notifyManager.notify(UPLOAD_NOTIFICATION_ID, notificationBuilder.build())
+                        .build()
+                notifyManager.notify(UPLOAD_NOTIFICATION_ID, notification)
                 Result.failure()
             }
 
         Result.success()
     }
 
+    private fun getNotificationBuilder(): Builder {
+        val cancel = "Cancel Sync"
+        // This PendingIntent can be used to cancel the worker
+        val intent = WorkManager.getInstance(applicationContext)
+            .createCancelPendingIntent(getId())
+
+        return NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(drawable.ic_baseline_cloud_upload)
+            .addAction(android.R.drawable.ic_delete, cancel, intent)
+    }
+
+    private fun createForegroundInfo(): ForegroundInfo {
+
+        val notification = getNotificationBuilder()
+            .setContentTitle("Syncing Media.....")
+            .setOngoing(true)
+            .setProgress(100, 0, true)
+            .build()
+
+        return ForegroundInfo(UPLOAD_NOTIFICATION_ID, notification)
+    }
 
 }
