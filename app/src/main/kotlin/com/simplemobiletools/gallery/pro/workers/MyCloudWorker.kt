@@ -72,7 +72,7 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                 .setRequiredNetworkType(CONNECTED)
                 .build()
 
-            val workRequest = PeriodicWorkRequest.Builder(MyCloudWorker::class.java, 3, HOURS)
+            val workRequest = PeriodicWorkRequest.Builder(MyCloudWorker::class.java, 24, HOURS)
                 .setConstraints(constraints)
                 .build()
 
