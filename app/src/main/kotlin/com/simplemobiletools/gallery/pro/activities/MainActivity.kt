@@ -39,10 +39,10 @@ import com.simplemobiletools.gallery.pro.dialogs.FilterMediaDialog
 import com.simplemobiletools.gallery.pro.extensions.*
 import com.simplemobiletools.gallery.pro.helpers.*
 import com.simplemobiletools.gallery.pro.interfaces.DirectoryOperationsListener
-import com.simplemobiletools.gallery.pro.jobs.MyCloudSyncerService
 import com.simplemobiletools.gallery.pro.jobs.NewPhotoFetcher
 import com.simplemobiletools.gallery.pro.models.Directory
 import com.simplemobiletools.gallery.pro.models.Medium
+import com.simplemobiletools.gallery.pro.workers.MyCloudWorker
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
 
@@ -420,10 +420,12 @@ class MainActivity : SimpleActivity(), DirectoryOperationsListener {
 
     private fun startMyCloudSyncer() {
         if (isOreoPlus()) {
-            val cloudSyncer = MyCloudSyncerService()
-            if (!cloudSyncer.isScheduled(applicationContext)) {
-                cloudSyncer.scheduleJob(applicationContext)
-            }
+//            val cloudSyncer = MyCloudSyncerService()
+//            if (!cloudSyncer.isScheduled(applicationContext)) {
+//                cloudSyncer.scheduleJob(applicationContext)
+//            }
+
+            MyCloudWorker.setUpWorker(this)
         }
     }
 

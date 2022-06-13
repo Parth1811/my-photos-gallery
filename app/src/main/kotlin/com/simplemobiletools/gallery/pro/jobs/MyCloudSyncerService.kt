@@ -1,5 +1,6 @@
 package com.simplemobiletools.gallery.pro.jobs
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.job.JobInfo
@@ -37,6 +38,7 @@ import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.*
 
+@SuppressLint("SpecifyJobSchedulerIdRange")
 @RequiresApi(Build.VERSION_CODES.O)
 class MyCloudSyncerService : JobService(){
     companion object {

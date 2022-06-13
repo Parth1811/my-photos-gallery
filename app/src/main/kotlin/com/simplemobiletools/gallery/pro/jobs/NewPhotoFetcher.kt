@@ -1,5 +1,6 @@
 package com.simplemobiletools.gallery.pro.jobs
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.job.JobInfo
 import android.app.job.JobInfo.TriggerContentUri
@@ -22,6 +23,7 @@ import com.simplemobiletools.gallery.pro.extensions.addPathToDB
 import com.simplemobiletools.gallery.pro.extensions.updateDirectoryPath
 
 // based on https://developer.android.com/reference/android/app/job/JobInfo.Builder.html#addTriggerContentUri(android.app.job.JobInfo.TriggerContentUri)
+@SuppressLint("SpecifyJobSchedulerIdRange")
 @TargetApi(Build.VERSION_CODES.N)
 class NewPhotoFetcher : JobService() {
     companion object {

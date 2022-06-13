@@ -568,6 +568,7 @@ fun Context.loadJpg(
     if (cropThumbnails) options.centerCrop() else options.fitCenter()
     var builder = Glide.with(applicationContext)
         .load(glideUrl)
+        .timeout(60000)
         .apply(options)
         .transition(DrawableTransitionOptions.withCrossFade())
 
