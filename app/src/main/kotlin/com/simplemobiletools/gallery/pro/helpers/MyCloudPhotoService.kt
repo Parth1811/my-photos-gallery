@@ -22,7 +22,10 @@ import java.util.concurrent.TimeUnit.SECONDS
 interface MyCloudPhotoAPI {
 
     @GET("/files/")
-    suspend fun getAllPhotos(@Header("Authorization") token: String): Response<List<UserFiles>>
+    suspend fun getAllPhotos(@Header("Authorization") token: String,
+                             @Query("limit") limit: Int?,
+                             @Query("offset") offset: Long?,
+    ): Response<Page<UserFiles>>
 
     @GET("/file-count/")
     suspend fun getAllPhotosCount(@Header("Authorization") token: String): Response<UserFileCount>

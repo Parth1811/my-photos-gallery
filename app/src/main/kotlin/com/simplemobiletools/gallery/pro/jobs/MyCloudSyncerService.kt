@@ -142,9 +142,9 @@ class MyCloudSyncerService : JobService(){
                 val response = myCloudPhotoAPI.api.getAllPhotosCount(myCloudPhotoAPI.TOKEN)
                 if(response.isSuccessful){
                     if(shouldPhotoSync(response.body())) {
-                        val allPhotoResponse = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
+                        val allPhotoResponse = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN, null, null)
                         if (allPhotoResponse.isSuccessful) {
-                            syncAllPhotos(allPhotoResponse.body())
+                            syncAllPhotos(allPhotoResponse.body()?.results)
                         } else {
                             Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
                             jobFinished(params, true)

@@ -3,6 +3,7 @@ package com.simplemobiletools.gallery.pro.workers
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.net.Uri
 import android.os.Build.VERSION_CODES
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -78,6 +79,20 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork("MyCloudSyncerWorker", KEEP, workRequest)
         }
+
+        fun doOneTimeWork(context: Context){
+
+            val constraints = Constraints.Builder()
+                .setRequiresBatteryNotLow(true)
+                .setRequiredNetworkType(CONNECTED)
+                .build()
+
+            val workRequest = OneTimeWorkRequest.Builder(MyCloudWorker::class.java)
+                .setConstraints(constraints)
+                .build()
+
+            WorkManager.getInstance(context).enqueueUniqueWork("MyCloudSyncerWorker", ExistingWorkPolicy.REPLACE, workRequest)
+        }
     }
 
 
@@ -131,25 +146,42 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
             try{
                 val myCloudPhotoAPI = RetrofitHelper.getInstance(applicationContext, applicationContext.config.useLocalServer)
                 if (myCloudPhotoAPI.TOKEN.isBlank()){
-                    Result.failure()
+                    return@withContext Result.failure()
                 }
 
                 val response = myCloudPhotoAPI.api.getAllPhotosCount(myCloudPhotoAPI.TOKEN)
                 if(response.isSuccessful){
                     if(shouldPhotoSync(response.body())) {
-                        val allPhotoResponse = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN)
-                        if (allPhotoResponse.isSuccessful) {
-                            syncAllPhotos(allPhotoResponse.body())
-                        } else {
-                            Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
-                            Result.failure()
+                        var next: String? = "first"
+                        var limit: Int? = null
+                        var offset: Long? = applicationContext.config.lastSyncOffset
 
+                        while(next.isNullOrEmpty().not()){
+                            val allPhotoResponse = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN, limit, offset)
+                            if (allPhotoResponse.isSuccessful) {
+                                val page = allPhotoResponse.body()
+                                Log.d(TAG, "Syncing Photo Batch with offset $offset of ${page?.count}")
+                                syncAllPhotos(page?.results)
+                                Log.d(TAG, "Syncing Complete ${page?.next}")
+
+                                next = page?.next
+                                if (next.isNullOrEmpty().not()) {
+                                    val uri = Uri.parse(next)
+                                    limit = uri.getQueryParameter("limit")?.toInt()
+                                    offset = uri.getQueryParameter("offset")?.toLong()
+                                    applicationContext.config.lastSyncOffset = offset ?: 0
+                                }
+
+                            } else {
+                                Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
+                                return@withContext Result.failure()
+                            }
                         }
+
                     }
-                    Result.success()
                 } else{
                     Log.e(TAG, "Error Code: ${response.code()} -- ${response.errorBody().toString()}")
-                    Result.failure()
+                    return@withContext Result.failure()
                 }
 
                 // Upload not backedUp files
@@ -233,7 +265,7 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                         .setProgress(0, 0, false)
                         .build()
                 notifyManager.notify(UPLOAD_NOTIFICATION_ID, notification)
-                Result.failure()
+                return@withContext Result.failure()
             }
 
         Result.success()

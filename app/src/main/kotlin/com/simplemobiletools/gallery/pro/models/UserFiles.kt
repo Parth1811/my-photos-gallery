@@ -16,6 +16,14 @@ data class UserFiles(
     @SerializedName("is_favorite") val isFavorite: Boolean
 )
 
+
+data class Page<T>(
+    val count: Long,
+    val next: String?,
+    val previous: String?,
+    val results: List<T>
+)
+
 data class UserFileCount(
     val count: Long
 )

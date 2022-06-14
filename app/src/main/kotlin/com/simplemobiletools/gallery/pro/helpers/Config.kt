@@ -529,8 +529,12 @@ class Config(context: Context) : BaseConfig(context) {
         set(token) = prefs.edit().putString(MY_CLOUD_TOKEN, token).apply()
 
     var useLocalServer: Boolean
-        get() = prefs.getBoolean(USE_LOCAL_SERVER, false)
+        get() = prefs.getBoolean(USE_LOCAL_SERVER, true)
         set(value) = prefs.edit().putBoolean(USE_LOCAL_SERVER, value).apply()
+
+    var lastSyncOffset: Long
+        get() = prefs.getLong(LAST_SYNC_OFFSET, 0)
+        set(value) = prefs.edit().putLong(LAST_SYNC_OFFSET, value).apply()
 
     var userName: String
         get() = prefs.getString(MY_CLOUD_USERNAME, "")!!

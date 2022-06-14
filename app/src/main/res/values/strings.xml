@@ -439,6 +439,7 @@
     <string name="login">Login</string>
     <string name="cancel">Cancel</string>
     <string name="login_title">Login to Cloud</string>
+    <string name="sync_photos_to_cloud">Sync Photos to Cloud</string>
 
     <!--
         Haven't found some strings? There's more at
