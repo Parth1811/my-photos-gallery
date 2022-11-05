@@ -3,7 +3,7 @@ package com.simplemobiletools.gallery.pro.interfaces
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy.REPLACE
+import androidx.room.OnConflictStrategy.IGNORE
 import androidx.room.Query
 import com.simplemobiletools.gallery.pro.helpers.MediumState
 import com.simplemobiletools.gallery.pro.models.Medium
@@ -46,10 +46,10 @@ interface MediumDao {
     @Query("SELECT COUNT(filename) FROM media WHERE state != 'CREATED'")
     fun getNumberOfCloudFiles(): Long
 
-    @Insert(onConflict = REPLACE)
+    @Insert(onConflict = IGNORE)
     fun insert(medium: Medium)
 
-    @Insert(onConflict = REPLACE)
+    @Insert(onConflict = IGNORE)
     fun insertAll(media: List<Medium>)
 
     @Delete

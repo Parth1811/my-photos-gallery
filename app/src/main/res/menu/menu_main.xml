@@ -17,7 +17,7 @@
         app:showAsAction="collapseActionView|always" />
     <item
         android:id="@+id/sync_my_photos"
-        android:icon="@drawable/ic_sync"
+        android:icon="@drawable/ic_cloud_sync"
         android:title="@string/sync_photos_to_cloud"
         app:showAsAction="always" />
     <item

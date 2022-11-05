@@ -570,6 +570,11 @@ class MediaAdapter(
             favorite.beVisibleIf(medium.isFavorite && config.markFavoriteItems)
             cloud.beVisibleIf(medium.path.isCloudPath())
 
+            if (medium.state == MediumState.BACKED_UP) {
+                cloud.beVisibleIf(medium.state == MediumState.BACKED_UP)
+                cloud.setImageResource(R.drawable.ic_cloud_done)
+            }
+
             play_portrait_outline?.beVisibleIf(medium.isVideo() || medium.isPortrait())
             if (medium.isVideo()) {
                 play_portrait_outline?.setImageResource(R.drawable.ic_play_outline_vector)

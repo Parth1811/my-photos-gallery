@@ -154,7 +154,7 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                     if(shouldPhotoSync(response.body())) {
                         var next: String? = "first"
                         var limit: Int? = null
-                        var offset: Long? = applicationContext.config.lastSyncOffset
+                        var offset: Long? = null
 
                         while(next.isNullOrEmpty().not()){
                             val allPhotoResponse = myCloudPhotoAPI.api.getAllPhotos(myCloudPhotoAPI.TOKEN, limit, offset)
@@ -169,7 +169,7 @@ open class MyCloudWorker(context: Context, params: WorkerParameters): CoroutineW
                                     val uri = Uri.parse(next)
                                     limit = uri.getQueryParameter("limit")?.toInt()
                                     offset = uri.getQueryParameter("offset")?.toLong()
-                                    applicationContext.config.lastSyncOffset = offset ?: 0
+//                                    applicationContext.config.lastSyncOffset = offset ?: 0
                                 }
 
                             } else {
